@@ -1,33 +1,88 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Dashboard from '@/components/Dashboard';
 import { apiService } from '@/api';
+import { useTheme } from '@/context/ThemeContext';
+import { ThemedView, ThemedText, ThemedButton } from '@/components/utils/ThemeComponents';
 
 const SuperAdminContent = () => {
-  const [call , setCall] = React.useState(false);
+const { setTheme, theme } = useTheme();
+  
+  const [call, setCall] = React.useState(false);
+
   useEffect(() => {
     const loadUsers = async () => {
       const users = await apiService.getUsers();
       console.log("hello");
-      
-      console.log("user data" , users);
+      console.log("user data", users);
     };
     loadUsers();
   }, [call]);
+  
+  // Set theme to 3 (Purple) on component mount
+  useEffect(() => {
+    setTheme(3);
+  }, [call]);
+
   return (
-    <View className='' style={styles.adminContent}>
-      <Text style={styles.sectionTitle}>Admin Management</Text>
-      <TouchableOpacity style={[styles.menuItem, styles.superAdminItem]}>
-        <Text onPress={() => {setCall(!call)}} style={styles.menuText}>Manage Admins</Text>
+    <ThemedView variant="transparent" style={{ flex: 1 }}>
+      <ThemedText size="lg" weight="bold" style={{ marginBottom: theme.spacing.md ,color: theme.colors.primary}}>
+        Admin Management
+      </ThemedText>
+      
+      {/* Manage Admins Button */}
+      <TouchableOpacity 
+        style={[
+          styles.menuItem, 
+          { 
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.border,
+            borderLeftColor: theme.colors.error,
+            marginBottom: theme.spacing.md,
+          }
+        ]}
+        onPress={() => setCall(!call)}
+      >
+        <ThemedText size="base" weight="medium">
+          Manage Admins
+        </ThemedText>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.menuItem, styles.adminItem]}>
-        <Text style={styles.menuText}>View All Users</Text>
+
+      {/* View All Users Button */}
+      <TouchableOpacity 
+        style={[
+          styles.menuItem, 
+          { 
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.border,
+            borderLeftColor: theme.colors.success,
+            marginBottom: theme.spacing.md,
+          }
+        ]}
+      >
+        <ThemedText size="base" weight="medium">
+          View All Users
+        </ThemedText>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.menuItem, styles.userItem]}>
-        <Text style={styles.menuText}>System Settings</Text>
+
+      {/* System Settings Button */}
+      <TouchableOpacity 
+        style={[
+          styles.menuItem, 
+          { 
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.border,
+            borderLeftColor: theme.colors.info,
+            marginBottom: theme.spacing.md,
+          }
+        ]}
+      >
+        <ThemedText size="base" weight="medium">
+          System Settings
+        </ThemedText>
       </TouchableOpacity>
-    </View>
-  )
+    </ThemedView>
+  );
 };
 
 export default function SuperAdminDashboard() {
@@ -40,38 +95,15 @@ export default function SuperAdminDashboard() {
 }
 
 const styles = StyleSheet.create({
-  adminContent: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#333',
-  },
   menuItem: {
-    backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
-    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#eee',
-  },
-  superAdminItem: {
     borderLeftWidth: 4,
-    borderLeftColor: '#ff6b6b',
-  },
-  adminItem: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#4ecdc4',
-  },
-  userItem: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#45b7d1',
-  },
-  menuText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
 });
