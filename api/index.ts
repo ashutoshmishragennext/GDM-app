@@ -6,47 +6,40 @@ import * as SecureStore from 'expo-secure-store';
 const AUTH_TOKEN_KEY = 'auth_token';
 const USER_DATA_KEY = 'user_data';
 
+// Get the Bearer token from environment variable
+const BEARER_TOKEN = process.env.EXPO_PUBLIC_BEARER_TOKEN || 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiI5MzI4ZmRjNC03ZThmLTQ1NTgtOTA4MS0xNjE3MDc4YTMyMDYiLCJleHAiOjE3NTYyNzYwNTl9.8T7NYohV7U3QROwubIyptIjDBbB49zVVMwE-0foZ6j0';
+
 class ApiService {
   private baseURL: string;
   private timeout: number;
-  private authToken: string | null = null;
+  private isLoggedIn: boolean = false;
 
   constructor() {
     this.baseURL = API_BASE_URL;
     this.timeout = API_TIMEOUT;
-    this.initializeToken();
+    this.initializeAuth();
   }
 
-  private async initializeToken() {
+  private async initializeAuth() {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
-      if (token) {
-        this.authToken = token;
-        console.log('Token initialized from storage');
+      const userData = await SecureStore.getItemAsync(USER_DATA_KEY);
+      if (userData) {
+        this.isLoggedIn = true;
+        console.log('User session restored');
       }
     } catch (error) {
-      console.error('Error initializing token:', error);
+      console.error('Error initializing auth:', error);
     }
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
-    if (!this.authToken) {
-      try {
-        const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
-        if (token) {
-          this.authToken = token;
-        }
-      } catch (error) {
-        console.error('Error getting auth token:', error);
-      }
-    }
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
-    if (this.authToken) {
-      headers['Authorization'] = `Bearer ${this.authToken}`;
+    // Only add Authorization header if user is logged in
+    if (this.isLoggedIn) {
+      headers['Authorization'] = `Bearer ${BEARER_TOKEN}`;
     }
 
     return headers;
@@ -59,7 +52,7 @@ class ApiService {
     try {
       const authHeaders = await this.getAuthHeaders();
       const fullUrl = `${this.baseURL}${url}`;
-      
+
       const response = await fetch(fullUrl, {
         ...options,
         signal: controller.signal,
@@ -68,7 +61,7 @@ class ApiService {
           ...options.headers,
         },
       });
-      
+
       clearTimeout(timeoutId);
       return response;
     } catch (error: any) {
@@ -86,8 +79,17 @@ class ApiService {
         await this.clearAuth();
         throw new Error('Authentication failed. Please login again.');
       }
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // If response is not JSON, use status text
+        errorMessage = response.statusText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -95,13 +97,23 @@ class ApiService {
   }
 
   private async clearAuth() {
-    this.authToken = null;
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(USER_DATA_KEY);
+    this.isLoggedIn = false;
+    try {
+      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+      await SecureStore.deleteItemAsync(USER_DATA_KEY);
+    } catch (error) {
+      console.error('Error clearing auth:', error);
+    }
   }
 
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await fetch(`${this.baseURL}/api/auth/login`, {
+async login(credentials: LoginRequest): Promise<LoginResponse> {
+  const url = `${this.baseURL}/api/auth/login`;
+  console.log("🚀 Making request to:", url);
+  console.log("📋 Credentials:", credentials);
+  console.log("🌐 Base URL:", this.baseURL);
+
+  try {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +121,15 @@ class ApiService {
       body: JSON.stringify(credentials),
     });
 
+    console.log("📡 Response received:", {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
     const data = await response.json();
+    console.log("📦 Response data:", data);
 
     if (!response.ok) {
       throw new Error(data.message || 'Login failed');
@@ -119,25 +139,37 @@ class ApiService {
       throw new Error('Invalid login response: missing user data');
     }
 
-    // Store token and user data
-    const mockToken = `session_${Date.now()}_${data.user.id}`;
-    this.authToken = mockToken;
-    
-    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, mockToken);
+    this.isLoggedIn = true;
     await SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(data.user));
 
     return {
       user: data.user,
-      token: mockToken,
+      token: BEARER_TOKEN,
       message: data.message
     };
+  } catch (error: any) {
+    console.error("❌ Login error details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    
+    // Provide more specific error messages
+    if (error.message.includes('Network request failed')) {
+      throw new Error('Cannot connect to server. Check if server is running and both devices are on same WiFi network.');
+    }
+    
+    throw error;
   }
+}
 
   async logout(): Promise<void> {
     try {
-      await this.fetchWithTimeout('/api/logout', {
-        method: 'POST',
-      });
+      if (this.isLoggedIn) {
+        await this.fetchWithTimeout('/api/auth/logout', {
+          method: 'POST',
+        });
+      }
     } catch (error) {
       console.error('Logout API error:', error);
     } finally {
@@ -156,10 +188,28 @@ class ApiService {
   }
 
   async getUserById(id: string): Promise<User> {
-    const response = await this.fetchWithTimeout(`/api/users?id=${id}`, {
+    const response = await this.fetchWithTimeout(`/api/users/${id}`, {
       method: 'GET',
     });
-    return this.handleResponse<User[]>(response).then(users => users[0]);
+    return this.handleResponse<User>(response);
+  }
+
+  async getUsers(): Promise<User[]> {
+    console.log("Fetching users");
+    
+    const response = await this.fetchWithTimeout('/api/users', {
+      method: 'GET',
+    });
+    
+    const users = await this.handleResponse<User[]>(response);
+    console.log("Users fetched:", users);
+    
+    return users;
+  }
+
+  // Getter to check if user is logged in
+  get isAuthenticated(): boolean {
+    return this.isLoggedIn;
   }
 }
 

@@ -1,14 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Dashboard from '@/components/Dashboard';
+import { apiService } from '@/api';
 
-const SuperAdminContent = () => (
-  <View style={styles.adminContent}>
-    <Text style={styles.sectionTitle}>User Panel</Text>
-    
-    
-  </View>
-);
+const SuperAdminContent = () => {
+  const [call , setCall] = React.useState(false);
+  useEffect(() => {
+    const loadUsers = async () => {
+      const users = await apiService.getUsers();
+      console.log("hello");
+      
+      console.log("user data" , users);
+    };
+    loadUsers();
+  }, [call]);
+  return (
+    <View style={styles.adminContent}>
+      <Text style={styles.sectionTitle}>Admin Management</Text>
+      <TouchableOpacity style={[styles.menuItem, styles.superAdminItem]}>
+        <Text onPress={() => {setCall(!call)}} style={styles.menuText}>Manage Admins</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.menuItem, styles.adminItem]}>
+        <Text style={styles.menuText}>View All Users</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.menuItem, styles.userItem]}>
+        <Text style={styles.menuText}>System Settings</Text>
+      </TouchableOpacity>
+    </View>
+  )
+};
 
 export default function SuperAdminDashboard() {
   return (

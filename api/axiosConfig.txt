@@ -1,0 +1,61 @@
+// src/api/axiosConfig.ts
+import axios from 'axios';
+import { API_BASE_URL, API_TIMEOUT } from '../constants/config';
+import * as SecureStore from 'expo-secure-store';
+
+const AUTH_TOKEN_KEY = 'auth_token';
+const AUTH_COOKIE_KEY = 'auth_cookie';
+
+// Create axios instance
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // This is important for cookie-based auth
+});
+
+// Add request interceptor to send cookies
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    try {
+      // Get the cookie from storage and add it to the request
+      const authCookie = await SecureStore.getItemAsync(AUTH_COOKIE_KEY);
+      if (authCookie) {
+        // Send as Cookie header for Next.js API
+        config.headers.Cookie = authCookie;
+      }
+    } catch (error) {
+      console.error('Error getting auth cookie:', error);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Add response interceptor to save cookies and handle errors
+axiosInstance.interceptors.response.use(
+  async (response) => {
+    // Check if response has Set-Cookie header
+    const setCookieHeader = response.headers['set-cookie'];
+    if (setCookieHeader && setCookieHeader.length > 0) {
+      // Store the cookie for future requests
+      const cookieString = setCookieHeader.join('; ');
+      await SecureStore.setItemAsync(AUTH_COOKIE_KEY, cookieString);
+      console.log('Cookie saved:', cookieString);
+    }
+    return response;
+  },
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Clear stored cookies on unauthorized
+      await SecureStore.deleteItemAsync(AUTH_COOKIE_KEY);
+      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;
+export { axiosInstance };
