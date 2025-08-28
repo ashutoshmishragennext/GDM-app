@@ -15,7 +15,7 @@ const SuperAdminContent = () => {
     loadUsers();
   }, [call]);
   return (
-    <View style={styles.adminContent}>
+    <View className=' bg-red-600' style={styles.adminContent}>
       <Text style={styles.sectionTitle}>Admin Management</Text>
       <TouchableOpacity style={[styles.menuItem, styles.superAdminItem]}>
         <Text onPress={() => {setCall(!call)}} style={styles.menuText}>Manage Admins</Text>

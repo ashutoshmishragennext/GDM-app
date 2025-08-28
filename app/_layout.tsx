@@ -2,6 +2,7 @@
 import React from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { Slot } from 'expo-router';
+// import "../global.css"; // Import your global CSS file
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 
 function RootLayoutNav() {
