@@ -150,10 +150,10 @@ const UserDashboard: React.FC<UserDashboardProps> = ({
         {/* Header */}
         <View className="flex-row justify-between items-start mb-6">
           <View className="flex-row items-center flex-1">
-            <View className={`w-12 h-12 ${getThemeColorClass('bg-500')} rounded-xl shadow-md items-center justify-center mr-3`}>
+            {/* <View className={`w-12 h-12 ${getThemeColorClass('bg-500')} rounded-xl shadow-md items-center justify-center mr-3`}>
               <BarChart3 size={24} color="white" />
-            </View>
-            <View className="flex-1">
+            </View> */}
+            <View className="flex-1 ml-2">
               <Text className="text-2xl font-bold text-gray-900">Dashboard</Text>
               <Text className="text-base text-gray-600">Document management overview</Text>
             </View>
@@ -257,7 +257,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({
         <View className="flex-row items-center justify-between mb-4">
           <View>
             <Text className="text-xl font-semibold text-gray-900">Your Folders</Text>
-            <Text className="text-sm text-gray-600">Tap on any folder to view and manage documents</Text>
+            <Text className="text-sm text-gray-600">Tap on any folder to view</Text>
           </View>
           <View className="bg-gray-50 px-3 py-1 rounded-full">
             <Text className="text-sm text-gray-500">

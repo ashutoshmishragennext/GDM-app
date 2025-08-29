@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 // import FolderFormView from './FolderFormView';
 // import PaymentSummary from './PaymentSummary';
 // import BottomNav from './BottomNav';
-import { User, Folder, Document as AppDocument, UserStats, UserDashboardResponse } from '../api/types';
+import { User, Folder, Document as AppDocument, UserStats, UserDashboardResponse } from '@/components/';
 import { apiService } from '@/api';
 
 const DocumentManagementDashboard = () => {
