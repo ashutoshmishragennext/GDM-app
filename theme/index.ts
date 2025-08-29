@@ -334,8 +334,8 @@ export const themes: Theme[] = [redTheme, blueTheme, greenTheme, purpleTheme];
 
 // Helper function to get theme by ID
 export const getThemeById = (id: number): Theme => {
-  return themes.find(theme => theme.id === id) || themes[3];
+  return themes.find(theme => theme.id === id) || themes[0];
 };
 
 // Default theme
-export const defaultTheme = themes[3];
+export const defaultTheme = themes[0];

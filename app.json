@@ -9,6 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
+    "permissions": [
+      "CAMERA",
+      "WRITE_EXTERNAL_STORAGE",
+      "READ_EXTERNAL_STORAGE"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -31,6 +36,13 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them.",
+          "cameraPermission": "The app accesses your camera to let you take photos."
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
