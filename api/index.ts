@@ -196,15 +196,15 @@ async login(credentials: LoginRequest): Promise<LoginResponse> {
     }
   }
 
-  async getCurrentUser(): Promise<User | null> {
-    try {
-      const userData = await SecureStore.getItemAsync(USER_DATA_KEY);
-      return userData ? JSON.parse(userData) : null;
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      return null;
-    }
-  }
+  // async getCurrentUser(): Promise<User | null> {
+  //   try {
+  //     const userData = await SecureStore.getItemAsync(USER_DATA_KEY);
+  //     return userData ? JSON.parse(userData) : null;
+  //   } catch (error) {
+  //     console.error('Error getting current user:', error);
+  //     return null;
+  //   }
+  // }
 
   async getUserById(id: string): Promise<User> {
     const response = await this.fetchWithTimeout(`/api/users?id=${id}`, {
@@ -234,6 +234,7 @@ async getDocuments(params?: SearchDocumentsRequest): Promise<Document[]> {
     const searchParams = new URLSearchParams();
     
     if (params.query) searchParams.append('query', params.query);
+    if (params.userId) searchParams.append('userId', params.userId);
     if (params.documentTypeId) searchParams.append('documentTypeId', params.documentTypeId);
     if (params.verificationStatus) searchParams.append('verificationStatus', params.verificationStatus);
     if (params.folderId) searchParams.append('folderId', params.folderId);
@@ -412,6 +413,9 @@ async uploadImage(file: File | any): Promise<AwsUploadResponse> {
     // Web File object
     formData.append('file', file);
   }
+
+  console.log("FormData prepared:", formData);
+  
   
   const response = await this.fetchWithTimeout('/api/aws-upload', {
     method: 'POST',

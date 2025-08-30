@@ -7,7 +7,7 @@ import { apiService } from '@/api';
 import BottomNav from './BottomNav';
 import FolderGrid from './UserDashboard';
 import MetaForm from './MetaForm';
-// import Summary from './PaymentSummary/MainSummary';
+import Summary from './PaymentSummary/MainSummary';
 import type { Document as AppDocument } from './DocumentsScreen';
 import DocumentDetailsScreen from './DocumentsScreen';
 import { useAuth } from '@/context/AuthContext';
@@ -100,7 +100,7 @@ const DocumentManagementDashboard = () => {
   // --- State ---
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [users, setUsers] = useState<any>();
+  // const [users, setUsers] = useState<any>();
   const [currentView, setCurrentView] = useState<'home' | 'form' | 'summary' | 'document-details'>('home');
   const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
   const [selectedFolderSchema, setSelectedFolderSchema] = useState<MetadataSchema | null>(null);
@@ -140,24 +140,28 @@ const DocumentManagementDashboard = () => {
     }
   }, [user]);
 
-  // const fetchDocuments = async (start = startDate, end = endDate) => {
-  //   try {
-  //     const data = await apiService.getDocuments({
-  //       folderId: selectedFolder?.id,
-  //       startDate: start,
-  //       endDate: end,
-  //     });
+  const fetchDocuments = async (start = startDate, end = endDate) => {
+    try {
+      const data = await apiService.getDocuments({
+        userId : currentuser?.id,
+        folderId: selectedFolder?.id,
+        startDate: start,
+        endDate: end,
+      });
       
-  //     setDirectoryFiles(data || []);
-  //     setDocuments(data || []);
-  //   } catch (error) {
-  //     Alert.alert('Error', 'Failed to fetch documents');
-  //   }
-  // };
+      setDirectoryFiles(data || []);
+      setDocuments(data || []);
+    } catch (error) {
+      console.log("Failed to fetch documents:", error);
+      
+      Alert.alert('Error', 'Failed to fetch documents');
+    }
+  };
 
-  // useEffect(() => {
-  //   // fetchDocuments();
-  // }, [selectedFolder, startDate, endDate]);
+  useEffect(() => {
+    if (selectedFolder)
+    fetchDocuments();
+  }, [selectedFolder, startDate, endDate]);
 
   const handleDateChange = ({ startDate: newStart, endDate: newEnd }: { startDate?: string; endDate?: string }) => {
     setStartDate(newStart || defaultDate);
@@ -203,7 +207,7 @@ const DocumentManagementDashboard = () => {
       console.log("Fetched user data:", data);
       
       setUser(data);
-      setUsers(data);
+      // setUsers(data);
     } catch (error) {
       Alert.alert('Error', 'Failed to load user data');
     }
@@ -309,7 +313,7 @@ const DocumentManagementDashboard = () => {
     }
     
     try {
-      const docs = await apiService.getDocuments({ folderId: folder.id });
+      const docs = await apiService.getDocuments({ folderId: folder.id , userId : currentuser?.id });
       setDirectoryFiles(docs || []);
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch folder documents');
@@ -632,7 +636,7 @@ const DocumentManagementDashboard = () => {
                 </View>
               )}
               
-              {/* {mainView === 'summary' && selectedFolder && (
+              {mainView === 'summary' && selectedFolder && (
                 <Summary
                   payments={payments}
                   startDate={startDate}
@@ -648,7 +652,7 @@ const DocumentManagementDashboard = () => {
                   folder={selectedFolder}
                   metadata={selectedFolderSchema}
                 />
-              )} */}
+              )}
             </ScrollView>
             
             <BottomNav

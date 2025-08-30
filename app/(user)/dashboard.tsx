@@ -1,11 +1,13 @@
 import DocumentManagementDashboard from '@/components/Users/EntryPage';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet } from 'react-native';
 
 
 export default function SuperAdminDashboard() {
   return (
-    <DocumentManagementDashboard />
+        // <SafeAreaView style={{ flex: 1 }}>
+          <DocumentManagementDashboard />
+        // </SafeAreaView>
   );
 }
 
