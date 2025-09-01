@@ -100,10 +100,6 @@ export const uploadImageFromFile = async (file: File | ImageFile | any) => {
     
     const uploadResult = await apiService.uploadImage(imageFile);
     
-    console.log('Upload successful:', uploadResult);
-    console.log('Image URL:', uploadResult.url);
-    console.log('Optimization:', uploadResult.optimization);
-    
     // Clean up object URL if we created one
     if (imageFile.uri.startsWith('blob:')) {
       URL.revokeObjectURL(imageFile.uri);

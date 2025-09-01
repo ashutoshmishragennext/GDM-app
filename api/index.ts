@@ -1,6 +1,6 @@
 // src/api/index.ts
 import { API_BASE_URL, API_TIMEOUT } from '../constants/config';
-import { AwsUploadInfoResponse, AwsUploadResponse, CreateDocumentRequest, CreateDocumentResponse, CreateDocumentTypeRequest, CreateFolderRequest, DeleteDocumentResponse, DeleteFolderResponse, DocumentTypeWithMetadata, Folder, GetFoldersRequest, GetFoldersResponse, LoginRequest, LoginResponse, ProcessImageApiInfo, ProcessImageRequest, ProcessImageResponse, SearchDocumentsRequest, UpdateDocumentRequest, UpdateDocumentResponse, User } from './types';
+import { AwsUploadInfoResponse, AwsUploadResponse, CreateDocumentRequest, CreateDocumentResponse, CreateDocumentTypeRequest, CreateFolderRequest, CreateOrganizationRequest, CreateOrganizationResponse, DeleteDocumentResponse, DeleteFolderResponse, DeleteOrganizationResponse, DocumentTypeWithMetadata, Folder, GetFoldersRequest, GetFoldersResponse, GetOrganizationsRequest, GetOrganizationsResponse, LoginRequest, LoginResponse, Organization, ProcessImageApiInfo, ProcessImageRequest, ProcessImageResponse, SearchDocumentsRequest, UpdateDocumentRequest, UpdateDocumentResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, User } from './types';
 import * as SecureStore from 'expo-secure-store';
 
 const AUTH_TOKEN_KEY = 'auth_token';
@@ -492,6 +492,97 @@ async getProcessImageInfo(): Promise<ProcessImageApiInfo> {
   
   return this.handleResponse<ProcessImageApiInfo>(response);
 }
+
+// Add to your ApiService class
+
+// GET /api/organizations - Get organizations with pagination and search
+async getOrganizations(params?: GetOrganizationsRequest): Promise<GetOrganizationsResponse> {
+  let url = '/api/organizations';
+  
+  if (params) {
+    const searchParams = new URLSearchParams();
+    
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.limit) searchParams.append('limit', params.limit.toString());
+    if (params.search) searchParams.append('search', params.search);
+    if (params.id) searchParams.append('id', params.id);
+    
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+  }
+  
+  console.log("Fetching organizations with URL:", url);
+  
+  const response = await this.fetchWithTimeout(url, {
+    method: 'GET',
+  });
+  
+  const result = await this.handleResponse<GetOrganizationsResponse>(response);
+  console.log("Organizations fetched:", result);
+  
+  return result;
+}
+
+// GET single organization by ID
+async getOrganizationById(id: string): Promise<Organization> {
+  console.log("Fetching organization by ID:", id);
+  
+  const response = await this.fetchWithTimeout(`/api/organizations?id=${id}`, {
+    method: 'GET',
+  });
+  
+  const organization = await this.handleResponse<Organization>(response);
+  console.log("Organization fetched:", organization);
+  
+  return organization;
+}
+
+// POST /api/organizations - Create a new organization
+async createOrganization(organizationData: CreateOrganizationRequest): Promise<CreateOrganizationResponse> {
+  console.log("Creating organization:", organizationData);
+  
+  const response = await this.fetchWithTimeout('/api/organizations', {
+    method: 'POST',
+    body: JSON.stringify(organizationData),
+  });
+  
+  const result = await this.handleResponse<CreateOrganizationResponse>(response);
+  console.log("Organization created:", result);
+  
+  return result;
+}
+
+// PUT /api/organizations - Update an organization
+async updateOrganization(id: string, updateData: UpdateOrganizationRequest): Promise<UpdateOrganizationResponse> {
+  console.log("Updating organization:", id, updateData);
+  
+  const response = await this.fetchWithTimeout(`/api/organizations?id=${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(updateData),
+  });
+  
+  const result = await this.handleResponse<UpdateOrganizationResponse>(response);
+  console.log("Organization updated:", result);
+  
+  return result;
+}
+
+// DELETE /api/organizations - Soft delete an organization
+async deleteOrganization(id: string): Promise<DeleteOrganizationResponse> {
+  console.log("Deleting organization:", id);
+  
+  const response = await this.fetchWithTimeout(`/api/organizations?id=${id}`, {
+    method: 'DELETE',
+  });
+  
+  const result = await this.handleResponse<DeleteOrganizationResponse>(response);
+  console.log("Organization deleted:", result);
+  
+  return result;
+}
+
 
 
 

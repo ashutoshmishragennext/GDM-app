@@ -399,13 +399,13 @@ const DocumentManagementDashboard = () => {
         mimeType: 'form',
         uploadThingUrl: '',
         folderId: selectedFolder ? selectedFolder.id : "",
-        organizationId: user?.organizationId,
+        organizationId: currentuser?.organizationId ?  currentuser?.organizationId : '',
         documentTypeId: documentTypes.find(dt => dt.metadata && dt.metadata[0]?.id === selectedFolder?.metadata?.documentTypeMetadataId)?.id,
         metadata,
         metadataSchemaId: selectedFolder?.metadata?.documentTypeMetadataId,
-        uploadedBy: user?.id || 'unknown',
-        verificationStatus: 'APPROVED',
-      });
+        uploadedBy: currentuser?.id || 'unknown',
+        verificationStatus: 'PENDING',
+      } , {userId : currentuser ?  currentuser?.id : ''});
       
       Alert.alert('Success', 'Document uploaded successfully!');
       if (selectedFolder?.id) {

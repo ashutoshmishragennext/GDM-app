@@ -122,7 +122,7 @@ const MetaForm: React.FC<MetaFormProps> = ({
     if (!fileList || fileList.length === 0) return;
     
     setUploadingKey(key);
-    const uploadedData: Array<{ url: string; size: number }> = [];
+    const uploadedData: Array<{ url: string; size: number | string }> = [];
 
     const fieldConfig = fileFields.find(f => f.key === key);
     const isSingleFile = fieldConfig?.field.type === 'singlefile';
@@ -168,13 +168,25 @@ const MetaForm: React.FC<MetaFormProps> = ({
     }
   };
 
-  const removeUrl = (key: string, index: number) => {
+// Fixed removeUrl function that handles both arrays and single values
+const removeUrl = (key: string, index: number) => {
+  const currentValue = values[key];
+  
+  if (Array.isArray(currentValue)) {
+    // Handle array case - remove specific index
+    const filteredArray = currentValue.filter((_, i) => i !== index);
     setValues({
       ...values,
-      [key]: values[key].filter((_: any, i: number) => i !== index),
+      [key]: filteredArray.length > 0 ? filteredArray : null, // Set to null if empty
     });
-  };
-
+  } else {
+    // Handle single value case - remove completely
+    setValues({
+      ...values,
+      [key]: null,
+    });
+  }
+};
   const handleNextImage = () => {
     if (enlargedImageIndex !== null && enlargedImageKey) {
       const images = values[enlargedImageKey] || [];
@@ -286,7 +298,7 @@ const MetaForm: React.FC<MetaFormProps> = ({
         contentContainerStyle={[
           styles.container,
           { 
-            padding: theme.spacing.md,
+            paddingTop: theme.spacing['sm'],
             paddingBottom: theme.spacing['3xl'], // Extra padding for bottom nav
           }
         ]}

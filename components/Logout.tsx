@@ -1,6 +1,6 @@
 // components/Dashboard.tsx
 import { useAuth } from '@/context/AuthContext';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert, // Add Modal import
   Image,
@@ -12,12 +12,27 @@ import {
   View,
 } from 'react-native';
 import { ThemedView } from './utils/ThemeComponents';
-import { useTheme } from '@/context/ThemeContext';
-
+import { useTheme  } from '@/context/ThemeContext';
+import { apiService } from '@/api';
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
-  const theme = useTheme();
+  const [orgLogo, setOrgLogo] = useState<string | null | undefined>(null);
+  const {theme,setTheme} = useTheme();
+  const fetchOrganizationLogo = async () => {
+    const data = await apiService.getOrganizationById(user?.organizationId ? user.organizationId : '',);
+    setOrgLogo(data.logo)
+    if(data.themecolor === "red") {
+      setTheme(0);
+    } else if (data.themecolor === "blue")
+      setTheme(1);
+      else
+        setTheme(2)
+  }
+
+  useEffect(() => {
+    fetchOrganizationLogo();
+  }, [])
   const handleLogout = () => {
     setShowDropdown(false);
     Alert.alert(
@@ -52,9 +67,9 @@ export default function Dashboard() {
         <View style={styles.logoContainer}>
           <View style={styles.logoPlaceholder}>
             <Image
-              source={{ uri: 'https://www.gennextit.com/assets/Frontend/logo/Gennextlogoxdarkblue.png' }}
-              height={40}
-              width={120}
+              source={{ uri: orgLogo ? orgLogo : 'https://www.gennextit.com/assets/Frontend/logo/Gennextlogoxdarkblue.png' }}
+              height={32}
+              width={130}
             />
           </View>
 
@@ -70,18 +85,18 @@ export default function Dashboard() {
             <ThemedView
               variant="transparent"
               style={[styles.avatar, {
-                backgroundColor: theme.theme.colors.primary,
+                backgroundColor: theme.colors.primary,
               }]}>
               <Text style={styles.avatarText}>
                 {user?.name?.charAt(0).toUpperCase()}
               </Text>
             </ThemedView>
 
-            <Text style={styles.userName}>{user?.name}</Text>
+            {/* <Text style={styles.userName}>{user?.name}</Text> */}
 
-            <Text style={[styles.dropdownArrow, showDropdown && styles.dropdownArrowUp]}>
+            {/* <Text style={[styles.dropdownArrow, showDropdown && styles.dropdownArrowUp]}>
               ▼
-            </Text>
+            </Text> */}
           </TouchableOpacity>
 
           {/* Use Modal instead of absolute positioning */}
@@ -98,7 +113,7 @@ export default function Dashboard() {
               activeOpacity={1}
             >
               <View style={styles.dropdownContainer}>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={styles.dropdownItem}
                   onPress={() => {
                     closeDropdown();
@@ -116,7 +131,7 @@ export default function Dashboard() {
                   activeOpacity={0.7}
                 >
                   <Text style={styles.dropdownItemText}>Settings</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <View style={styles.dropdownSeparator} />
 

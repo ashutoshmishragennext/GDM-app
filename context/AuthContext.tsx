@@ -61,23 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [user, segments, isLoading, initialNavigation]);
 
-  // const loadUserFromStorage = async () => {
-  //   try {
-  //     const cookies = await getCookies();
-  //     if (cookies && cookies.token) {
-  //       setUser({
-  //         id: cookies.userId || '',
-  //         name: cookies.name,
-  //         email: cookies.email,
-  //         role: cookies.role as 'SUPER_ADMIN' | 'ADMIN' | 'USER'
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error loading user:', error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const AUTH_TOKEN_KEY = 'auth_token';
   const USER_DATA_KEY = 'user_data';

@@ -387,7 +387,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
                                 {icon}
                               </Text>
                               <Text className="text-sm font-semibold text-gray-900" numberOfLines={1}>
-                                {formattedValue}
+                                {formattedValue.length > 20 ? `${formattedValue.substring(0,20)}...` : formattedValue}
                               </Text>
                               {index < filteredFields.length - 1 && (
                                 <Text className="text-gray-300 mx-1">•</Text>

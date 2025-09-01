@@ -260,27 +260,6 @@ const CameraGalleryPopup: React.FC<CameraGalleryPopupProps> = ({
                   </TouchableOpacity>
                 </View>
 
-                {/* Cancel Button */}
-                <View style={[styles.footer, { borderTopColor: theme.colors.border }]}>
-                  <TouchableOpacity
-                    onPress={onClose}
-                    style={[
-                      styles.cancelButton,
-                      { 
-                        borderRadius: theme.borderRadius.md,
-                        paddingVertical: theme.spacing.sm,
-                      }
-                    ]}
-                  >
-                    <ThemedText 
-                      size="base" 
-                      weight="medium"
-                      style={{ color: theme.colors.textSecondary }}
-                    >
-                      Cancel
-                    </ThemedText>
-                  </TouchableOpacity>
-                </View>
               </ThemedView>
             </TouchableOpacity>
           </View>

@@ -269,6 +269,7 @@ export interface AwsUploadResponse {
   url: string;
   key: string;
   fileName: string;
+  size : string;
   optimization: OptimizationInfo;
 }
 
@@ -291,10 +292,6 @@ export interface ImageFile {
 
 // Image Processing related types
 export interface ExtractedData {
-  Name: string;
-  Amount: number;
-  paidto: string;
-  purposeofPayment: string;
   [key: string]: any; // Allow for dynamic fields
 }
 
@@ -351,4 +348,91 @@ export interface ContractExtractionFields {
   effectiveDate: string;
   expirationDate: string;
   value: number;
+}
+
+// Organization-related types
+export interface Organization {
+  id: string;
+  name: string;
+  code: string;
+  email: string;
+  phone: string;
+  logo?: string | null;
+  themecolor: string;
+  description?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginationInfo {
+  total: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+// Request types
+export interface GetOrganizationsRequest {
+  page?: number;
+  limit?: number;
+  search?: string;
+  id?: string;
+}
+
+export interface CreateOrganizationRequest {
+  name: string;
+  code: string;
+  email: string;
+  phone: string;
+  logo?: string;
+  themecolor: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface UpdateOrganizationRequest {
+  name?: string;
+  code?: string;
+  email?: string;
+  phone?: string;
+  logo?: string;
+  themecolor?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+// Response types
+export interface GetOrganizationsResponse {
+  organizations?: Organization[];
+  pagination?: PaginationInfo;
+  // For single organization response
+  id?: string;
+  name?: string;
+  code?: string;
+  email?: string;
+  phone?: string;
+  logo?: string | null;
+  themecolor?: string;
+  description?: string | null;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateOrganizationResponse {
+  message: string;
+  organization: Organization;
+}
+
+export interface UpdateOrganizationResponse {
+  message: string;
+  organization: Organization;
+}
+
+export interface DeleteOrganizationResponse {
+  message: string;
+  organization: Organization;
 }

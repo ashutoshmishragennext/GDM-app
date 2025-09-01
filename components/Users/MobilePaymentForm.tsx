@@ -154,9 +154,9 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
     const fieldConfig = fileFields.find(f => f.key === fieldKey);
     const isSingleFile = fieldConfig?.field.type === 'singlefile';
 
-    if (!images || 
-        (isSingleFile && !images) || 
-        (!isSingleFile && (!Array.isArray(images) || images.length === 0))) {
+    if (!images ||
+      (isSingleFile && !images) ||
+      (!isSingleFile && (!Array.isArray(images) || images.length === 0))) {
       setAiError("No images found to process. Please upload an image first.");
       return;
     }
@@ -298,14 +298,14 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
   const validateAllFields = (): { isValid: boolean; errors: Record<string, string> } => {
     const errors: Record<string, string> = {};
     const allFieldsToValidate = getAllFields();
-    
+
     allFieldsToValidate.forEach(({ key, field, parentSchema, fieldType }) => {
       const isRequired = parentSchema.required?.includes(key);
-      
+
       if (fieldType === 'file' || fieldType === 'singlefile') {
-        if (isRequired && (!values[key] || 
-            (Array.isArray(values[key]) && values[key].length === 0) ||
-            (!Array.isArray(values[key]) && !values[key]))) {
+        if (isRequired && (!values[key] ||
+          (Array.isArray(values[key]) && values[key].length === 0) ||
+          (!Array.isArray(values[key]) && !values[key]))) {
           errors[key] = `${field.description || key} is required. Please upload an image.`;
         }
       } else {
@@ -378,7 +378,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                       handleInputChange('');
                     }
                   }}
-                  placeholder="0.00"
+                  placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
                   keyboardType="decimal-pad"
                 />
                 {field.currency && (
@@ -421,7 +421,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               style={inputStyle}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder="Enter your email"
+              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -444,7 +444,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 const cleaned = text.replace(/[^0-9+\-\s()]/g, '');
                 handleInputChange(cleaned);
               }}
-              placeholder={field.type === 'phone' ? 'Enter mobile number' : 'Enter landline number'}
+              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
               keyboardType="phone-pad"
             />
             {hasError && (
@@ -464,9 +464,9 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 onValueChange={(itemValue) => handleInputChange(itemValue)}
                 style={[styles.picker, { color: theme.colors.text }]}
               >
-                <Picker.Item 
-                  label={`Select ${(field.description || key).replace(' field', '')}`} 
-                  value="" 
+                <Picker.Item
+                  label={`Select ${(field.description || key).replace(' field', '')}`}
+                  value=""
                   color={theme.colors.textSecondary}
                 />
                 {field.options?.map((option: string) => (
@@ -491,9 +491,9 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 onValueChange={(itemValue) => handleInputChange(itemValue)}
                 style={[styles.picker, { color: theme.colors.text }]}
               >
-                <Picker.Item 
-                  label={`Select ${(field.description || key).replace(' field', '')}`} 
-                  value="" 
+                <Picker.Item
+                  label={`Select ${(field.description || key).replace(' field', '')}`}
+                  value=""
                   color={theme.colors.textSecondary}
                 />
                 <Picker.Item label="Yes" value="true" />
@@ -532,7 +532,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               style={[inputStyle, styles.textArea]}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder={`Enter ${(field.description || key).replace(' field', '')}`}
+              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -552,7 +552,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               style={inputStyle}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder={`Enter ${(field.description || key).replace(' field', '')}`}
+              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
             />
             {hasError && (
               <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
@@ -585,7 +585,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
           } else if (depField.type === 'file') {
             fieldType = 'singlefile';
           }
-          
+
           allFields.push({
             key: depKey,
             field: depField,
@@ -607,51 +607,51 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
 
   const sortedFields = getAllFields();
 
-  const deleteCurrentImage = () => {
-    const currentFieldKey = Object.keys(values).find(key => {
-      const fieldValue = values[key];
-      if (Array.isArray(fieldValue)) {
-        return fieldValue.some(item => 
-          getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
-        );
-      } else if (fieldValue) {
-        return getImageUrl(fieldValue) === imageViewer.images[imageViewer.currentIndex];
-      }
-      return false;
-    });
-
-    if (currentFieldKey) {
-      const fieldValue = values[currentFieldKey];
-      if (Array.isArray(fieldValue)) {
-        const imageIndex = fieldValue.findIndex(item => 
-          getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
-        );
-        if (imageIndex !== -1) {
-          removeUrl(currentFieldKey, imageIndex);
-          
-          const newImages = imageViewer.images.filter((_, idx) => idx !== imageViewer.currentIndex);
-          if (newImages.length === 0) {
-            closeImageViewer();
-          } else {
-            const newIndex = imageViewer.currentIndex >= newImages.length ? 
-              newImages.length - 1 : imageViewer.currentIndex;
-            setImageViewer(prev => ({
-              ...prev,
-              images: newImages,
-              currentIndex: newIndex
-            }));
-          }
-        }
-      } else {
-        removeUrl(currentFieldKey, 0);
-        closeImageViewer();
-      }
+// Updated deleteCurrentImage function for React Native
+const deleteCurrentImage = () => {
+  const currentFieldKey = Object.keys(values).find(key => {
+    const fieldValue = values[key];
+    if (Array.isArray(fieldValue)) {
+      return fieldValue.some(item =>
+        getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
+      );
+    } else if (fieldValue) {
+      return getImageUrl(fieldValue) === imageViewer.images[imageViewer.currentIndex];
     }
-  };
+    return false;
+  });
 
+  if (currentFieldKey) {
+    const fieldValue = values[currentFieldKey];
+    if (Array.isArray(fieldValue)) {
+      const imageIndex = fieldValue.findIndex(item =>
+        getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
+      );
+      if (imageIndex !== -1) {
+        removeUrl(currentFieldKey, imageIndex);
+
+        const newImages = imageViewer.images.filter((_, idx) => idx !== imageViewer.currentIndex);
+        if (newImages.length === 0) {
+          closeImageViewer();
+        } else {
+          const newIndex = imageViewer.currentIndex >= newImages.length ?
+            newImages.length - 1 : imageViewer.currentIndex;
+          setImageViewer(prev => ({
+            ...prev,
+            images: newImages,
+            currentIndex: newIndex
+          }));
+        }
+      }
+    } else {
+      removeUrl(currentFieldKey, 0);
+      closeImageViewer();
+    }
+  }
+};
   return (
     <ThemedView variant="background" style={{ flex: 1 }}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={[
           styles.container,
           { paddingBottom: theme.spacing['3xl'] }
@@ -659,30 +659,30 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <ThemedView 
+        <ThemedView
           variant="transparent"
           style={[
             styles.header,
-            { 
+            {
               backgroundColor: theme.colors.primary,
               marginBottom: theme.spacing.md,
             }
           ]}
         >
-          <ThemedText 
-            size="xl" 
-            weight="bold" 
+          <ThemedText
+            size="xl"
+            weight="bold"
             style={{ color: theme.colors.background, textAlign: 'center' }}
           >
             {folder?.name} Entry
           </ThemedText>
-          <ThemedText 
-            size="sm" 
-            style={{ 
-              color: theme.colors.background, 
-              opacity: 0.9, 
+          <ThemedText
+            size="sm"
+            style={{
+              color: theme.colors.background,
+              opacity: 0.9,
               textAlign: 'center',
-              marginTop: theme.spacing.xs 
+              marginTop: theme.spacing.xs
             }}
           >
             Enter {folder?.name} details
@@ -693,11 +693,11 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
         {(aiSuccess || aiError) && (
           <View style={[styles.statusContainer, { marginBottom: theme.spacing.md }]}>
             {aiSuccess && (
-              <ThemedView 
+              <ThemedView
                 variant="transparent"
                 style={[
                   styles.statusMessage,
-                  { 
+                  {
                     backgroundColor: `${theme.colors.success}20`,
                     borderColor: theme.colors.success,
                   }
@@ -705,8 +705,8 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               >
                 <View style={styles.statusContent}>
                   <Text style={[styles.statusIcon, { color: theme.colors.success }]}>✨</Text>
-                  <ThemedText 
-                    size="sm" 
+                  <ThemedText
+                    size="sm"
                     weight="medium"
                     style={{ color: theme.colors.success, flex: 1 }}
                   >
@@ -719,11 +719,11 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               </ThemedView>
             )}
             {aiError && (
-              <ThemedView 
+              <ThemedView
                 variant="transparent"
                 style={[
                   styles.statusMessage,
-                  { 
+                  {
                     backgroundColor: `${theme.colors.error}20`,
                     borderColor: theme.colors.error,
                   }
@@ -731,8 +731,8 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               >
                 <View style={styles.statusContent}>
                   <Text style={[styles.statusIcon, { color: theme.colors.error }]}>⚠</Text>
-                  <ThemedText 
-                    size="sm" 
+                  <ThemedText
+                    size="sm"
                     weight="medium"
                     style={{ color: theme.colors.error, flex: 1 }}
                   >
@@ -748,7 +748,7 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
         )}
 
         {/* Form Container */}
-        <ThemedView 
+        <ThemedView
           variant="surface"
           style={[
             styles.formContainer,
@@ -764,19 +764,19 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
             const hasError = validationErrors[key];
 
             return (
-              <View 
-                key={key} 
-                style={[styles.fieldContainer, { marginBottom: theme.spacing.md }]}
+              <View
+                key={key}
+                style={[{ marginBottom: theme.spacing.md }]}
               >
                 {(fieldType === 'file' || fieldType === 'singlefile') ? (
                   // File upload field
                   <View>
-                    <ThemedText 
-                      size="sm" 
-                      weight="medium" 
-                      style={{ 
+                    <ThemedText
+                      size="sm"
+                      weight="medium"
+                      style={{
                         color: theme.colors.text,
-                        marginBottom: theme.spacing.sm 
+                        marginBottom: theme.spacing.sm
                       }}
                     >
                       {field.description || key}
@@ -785,152 +785,152 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                       )}
                     </ThemedText>
 
-                    {/* Upload Section */}
                     <View style={styles.uploadSection}>
-                      {/* Upload Button */}
-                      <TouchableOpacity
-                        style={[
-                          styles.uploadButton,
-                          {
-                            borderColor: hasError ? theme.colors.error : theme.colors.border,
-                            backgroundColor: uploadingKey === key ? theme.colors.surface : 'transparent',
-                          }
-                        ]}
-                        onPress={() => openImagePopup(key)}
-                        disabled={uploadingKey === key}
-                      >
-                        {uploadingKey === key ? (
-                          <View style={styles.uploadingContent}>
-                            <ActivityIndicator 
-                              size="large" 
-                              color={theme.colors.primary} 
-                            />
-                            <ThemedText 
-                              size="sm" 
-                              style={{ 
-                                color: theme.colors.textSecondary,
-                                marginTop: theme.spacing.xs 
-                              }}
-                            >
-                              Uploading...
-                            </ThemedText>
-                          </View>
-                        ) : (
-                          <View style={styles.uploadContent}>
-                            <Text style={[styles.uploadIcon, { color: theme.colors.primary }]}>📷</Text>
-                            <ThemedText 
-                              size="sm" 
-                              weight="medium"
-                              style={{ color: theme.colors.primary }}
-                            >
-                              Upload Image
-                            </ThemedText>
-                          </View>
-                        )}
+                      {/* Main Row Container */}
+                      <View style={styles.uploadRow}>
+                        {/* Upload Button */}
+                        <TouchableOpacity
+                          style={[
+                            styles.uploadButton,
+                            {
+                              borderColor: hasError ? theme.colors.error : theme.colors.border,
+                              backgroundColor: uploadingKey === key ? theme.colors.surface : 'transparent',
+                            }
+                          ]}
+                          onPress={() => openImagePopup(key)}
+                          disabled={uploadingKey === key}
+                        >
+                          {uploadingKey === key ? (
+                            <View style={styles.uploadingContent}>
+                              <ActivityIndicator
+                                size="small"
+                                color={theme.colors.primary}
+                              />
+                              <ThemedText
+                                size="xs"
+                                style={{
+                                  color: theme.colors.textSecondary,
+                                  marginTop: 2
+                                }}
+                              >
+                                Uploading...
+                              </ThemedText>
+                            </View>
+                          ) : (
+                            <View style={styles.uploadContent}>
+                              <Text style={[styles.uploadIcon, { color: theme.colors.primary }]}>📷</Text>
+                              <ThemedText
+                                size="xs"
+                                weight="medium"
+                                style={{ color: theme.colors.primary }}
+                              >
+                                Upload
+                              </ThemedText>
+                            </View>
+                          )}
 
-                        {/* Count Badge */}
+                          {/* Count Badge */}
+                          {values[key] && (
+                            (Array.isArray(values[key]) && values[key].length > 0) ||
+                            (!Array.isArray(values[key]) && values[key])
+                          ) && (
+                              <View
+                                style={[
+                                  styles.countBadge,
+                                  { backgroundColor: theme.colors.primary }
+                                ]}
+                              >
+                                <ThemedText
+                                  size="xs"
+                                  weight="bold"
+                                  style={{ color: theme.colors.background }}
+                                >
+                                  {Array.isArray(values[key]) ? values[key].length : 1}
+                                </ThemedText>
+                              </View>
+                            )}
+                        </TouchableOpacity>
+
+                        {/* Preview and AI Button Container */}
                         {values[key] && (
                           (Array.isArray(values[key]) && values[key].length > 0) ||
                           (!Array.isArray(values[key]) && values[key])
                         ) && (
-                          <View 
-                            style={[
-                              styles.countBadge,
-                              { backgroundColor: theme.colors.primary }
-                            ]}
-                          >
-                            <ThemedText 
-                              size="xs" 
-                              weight="bold"
-                              style={{ color: theme.colors.background }}
-                            >
-                              {Array.isArray(values[key]) ? values[key].length : 1}
-                            </ThemedText>
-                          </View>
-                        )}
-                      </TouchableOpacity>
+                            <View style={styles.previewAiContainer }>
+                              {/* Preview Thumbnails */}
+                              <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={styles.previewScroll}
+                                contentContainerStyle={styles.previewContent}
+                              >
+                                {(Array.isArray(values[key]) ? values[key] : [values[key]]).map((item: any, index: number) => (
+                                  <TouchableOpacity
+                                    key={index}
+                                    onPress={() => {
+                                      const imagesToView = Array.isArray(values[key]) ? values[key] : [values[key]];
+                                      openImageViewer(imagesToView, index, key);
+                                    }}
+                                    style={styles.previewContainer}
+                                  >
+                                    <Image
+                                      source={{ uri: getImageUrl(item) }}
+                                      style={[
+                                        styles.previewImage,
+                                        { borderColor: theme.colors.border }
+                                      ]}
+                                      resizeMode="cover"
+                                    />
+                                  </TouchableOpacity>
+                                ))}
+                              </ScrollView>
 
-                      {/* Preview Thumbnails */}
-                      {values[key] && (
-                        (Array.isArray(values[key]) && values[key].length > 0) ||
-                        (!Array.isArray(values[key]) && values[key])
-                      ) && (
-                        <ScrollView 
-                          horizontal 
-                          showsHorizontalScrollIndicator={false}
-                          style={styles.previewScroll}
-                          contentContainerStyle={{ gap: theme.spacing.sm }}
-                        >
-                          {(Array.isArray(values[key]) ? values[key] : [values[key]]).map((item: any, index: number) => (
-                            <TouchableOpacity
-                              key={index}
-                              onPress={() => {
-                                const imagesToView = Array.isArray(values[key]) ? values[key] : [values[key]];
-                                openImageViewer(imagesToView, index, key);
-                              }}
-                              style={styles.previewContainer}
-                            >
-                              <Image
-                                source={{ uri: getImageUrl(item) }}
+                              {/* AI Generate Button */}
+                              <TouchableOpacity
                                 style={[
-                                  styles.previewImage,
-                                  { borderColor: theme.colors.border }
+                                  styles.aiButton,
+                                  {
+                                    borderColor: theme.colors.info,
+                                    backgroundColor: `${theme.colors.info}10`,
+                                  }
                                 ]}
-                                resizeMode="cover"
-                              />
-                            </TouchableOpacity>
-                          ))}
-                        </ScrollView>
-                      )}
-
-                      {/* AI Generate Button */}
-                      {values[key] && (
-                        (Array.isArray(values[key]) && values[key].length > 0) ||
-                        (!Array.isArray(values[key]) && values[key])
-                      ) && (
-                        <TouchableOpacity
-                          style={[
-                            styles.aiButton,
-                            { 
-                              borderColor: theme.colors.info,
-                              backgroundColor: `${theme.colors.info}10`,
-                            }
-                          ]}
-                          onPress={() => processImageWithAI(key)}
-                          disabled={aiProcessing === key}
-                        >
-                          {aiProcessing === key ? (
-                            <View style={styles.aiContent}>
-                              <ActivityIndicator size="small" color={theme.colors.info} />
-                              <ThemedText 
-                                size="xs" 
-                                weight="medium"
-                                style={{ color: theme.colors.info, marginLeft: theme.spacing.xs }}
+                                onPress={() => processImageWithAI(key)}
+                                disabled={aiProcessing === key}
                               >
-                                Processing...
-                              </ThemedText>
-                            </View>
-                          ) : (
-                            <View style={styles.aiContent}>
-                              <Text style={[styles.aiIcon, { color: theme.colors.info }]}>⚡</Text>
-                              <ThemedText 
-                                size="xs" 
-                                weight="medium"
-                                style={{ color: theme.colors.info }}
-                              >
-                                Generate with AI
-                              </ThemedText>
+                                {aiProcessing === key ? (
+                                  <View style={styles.aiContent}>
+                                    <ActivityIndicator size="small" color={theme.colors.info} />
+                                    <ThemedText
+                                      size="xs"
+                                      weight="medium"
+                                      style={{ color: theme.colors.info, marginLeft: 4 }}
+                                    >
+                                      Processing...
+                                    </ThemedText>
+                                  </View>
+                                ) : (
+                                  <View style={styles.aiContent}>
+                                    <Text style={[styles.aiIcon, { color: theme.colors.info }]}>⚡</Text>
+                                    <ThemedText
+                                      size="xs"
+                                      weight="medium"
+                                      style={{ color: theme.colors.info }}
+                                    >
+                                      AI Generate
+                                    </ThemedText>
+                                  </View>
+                                )}
+                              </TouchableOpacity>
                             </View>
                           )}
-                        </TouchableOpacity>
-                      )}
+                      </View>
                     </View>
 
                     {hasError && (
                       <View style={styles.errorContainer}>
                         <Text style={[styles.errorIcon, { color: theme.colors.error }]}>⚠</Text>
-                        <ThemedText 
-                          size="xs" 
+                        <ThemedText
+                          size="xs"
                           style={{ color: theme.colors.error, flex: 1 }}
                         >
                           {hasError}
@@ -941,21 +941,21 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 ) : (
                   // Regular form field
                   <View>
-                    <ThemedText 
-                      size="sm" 
-                      weight="medium" 
-                      style={{ 
+                    {/* <ThemedText
+                      size="sm"
+                      weight="medium"
+                      style={{
                         color: theme.colors.text,
-                        marginBottom: theme.spacing.sm 
+                        marginBottom: theme.spacing.sm
                       }}
                     >
                       {(field.description || key).replace(' field', '')}
                       {isRequired && (
                         <Text style={{ color: theme.colors.error }}> *</Text>
                       )}
-                    </ThemedText>
+                    </ThemedText> */}
 
-                    {renderField(key, field, parentSchema)}
+                    {renderField(key, field, parentSchema )}
                   </View>
                 )}
               </View>
@@ -979,20 +979,20 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
             {loading ? (
               <View style={styles.loadingContent}>
                 <ActivityIndicator size="small" color={theme.colors.background} />
-                <ThemedText 
-                  size="base" 
+                <ThemedText
+                  size="base"
                   weight="medium"
-                  style={{ 
-                    color: theme.colors.background, 
-                    marginLeft: theme.spacing.sm 
+                  style={{
+                    color: theme.colors.background,
+                    marginLeft: theme.spacing.sm
                   }}
                 >
                   Processing...
                 </ThemedText>
               </View>
             ) : (
-              <ThemedText 
-                size="base" 
+              <ThemedText
+                size="base"
                 weight="semibold"
                 style={{ color: theme.colors.background }}
               >
@@ -1038,15 +1038,15 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
           {/* Navigation Buttons */}
           {imageViewer.images.length > 1 && (
             <>
-              <TouchableOpacity 
-                onPress={goToPrevious} 
+              <TouchableOpacity
+                onPress={goToPrevious}
                 style={[styles.navButton, styles.navLeft]}
               >
                 <Text style={styles.navButtonText}>‹</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                onPress={goToNext} 
+
+              <TouchableOpacity
+                onPress={goToNext}
                 style={[styles.navButton, styles.navRight]}
               >
                 <Text style={styles.navButtonText}>›</Text>
@@ -1072,10 +1072,10 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                   onPress={() => setImageViewer(prev => ({ ...prev, currentIndex: idx }))}
                   style={[
                     styles.indicator,
-                    { 
-                      backgroundColor: idx === imageViewer.currentIndex 
-                        ? theme.colors.background 
-                        : theme.colors.disabled 
+                    {
+                      backgroundColor: idx === imageViewer.currentIndex
+                        ? theme.colors.background
+                        : theme.colors.disabled
                     }
                   ]}
                 />
@@ -1090,8 +1090,8 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
               ]}
             >
               <Text style={[styles.deleteIcon, { color: theme.colors.background }]}>🗑</Text>
-              <ThemedText 
-                size="sm" 
+              <ThemedText
+                size="sm"
                 weight="medium"
                 style={{ color: theme.colors.background, marginLeft: theme.spacing.xs }}
               >
@@ -1104,11 +1104,9 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
     </ThemedView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 12,
   },
   header: {
     paddingVertical: 8,
@@ -1143,71 +1141,109 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  fieldContainer: {
-    // Individual field styling
-  },
+
+  // Updated Upload Section Styles
   uploadSection: {
-    gap: 12,
+    marginVertical: 8,
   },
+
+  uploadRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+
   uploadButton: {
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 8,
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 80,
+    width: 90,
     position: 'relative',
+    flexShrink: 0,
   },
+
   uploadingContent: {
     alignItems: 'center',
   },
+
   uploadContent: {
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
+
   uploadIcon: {
-    fontSize: 28,
+    fontSize: 20,
   },
+
   countBadge: {
     position: 'absolute',
     top: -4,
     right: -4,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    minWidth: 24,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    minWidth: 20,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: 'white',
   },
-  previewScroll: {
-    // Horizontal scroll for thumbnails
+
+  previewAiContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 80,
   },
+
+  previewScroll: {
+    flex: 1,
+    maxHeight: 80,
+  },
+
+  previewContent: {
+    gap: 6,
+    alignItems: 'center',
+  },
+
   previewContainer: {
-    borderRadius: 8,
+    borderRadius: 6,
     overflow: 'hidden',
   },
+
   previewImage: {
     width: 60,
     height: 60,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
   },
+
   aiButton: {
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
+    borderRadius: 6,
+    padding: 6,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+    paddingHorizontal: 8,
+    flexShrink: 0,
   },
+
   aiContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 2,
   },
+
   aiIcon: {
-    fontSize: 16,
-    marginRight: 4,
+    fontSize: 14,
   },
+
+  // Error and Input Styles
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1265,6 +1301,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+
+  // Image Viewer Modal Styles
   imageViewerOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.9)',
