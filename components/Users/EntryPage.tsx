@@ -143,7 +143,7 @@ const DocumentManagementDashboard = () => {
   const fetchDocuments = async (start = startDate, end = endDate) => {
     try {
       const data = await apiService.getDocuments({
-        userId : currentuser?.id,
+        userId : currentuser ? currentuser.id : '',
         folderId: selectedFolder?.id,
         startDate: start,
         endDate: end,
@@ -398,7 +398,7 @@ const DocumentManagementDashboard = () => {
         fileSize: totalFileSize,
         mimeType: 'form',
         uploadThingUrl: '',
-        folderId: selectedFolder?.id,
+        folderId: selectedFolder ? selectedFolder.id : "",
         organizationId: user?.organizationId,
         documentTypeId: documentTypes.find(dt => dt.metadata && dt.metadata[0]?.id === selectedFolder?.metadata?.documentTypeMetadataId)?.id,
         metadata,
@@ -420,151 +420,6 @@ const DocumentManagementDashboard = () => {
       setMetaFormUploading(false);
     }
   };
-
-  // Desktop nav component
-  const DesktopNav = () => (
-    <ThemedView 
-      variant="surface" 
-      style={[
-        styles.desktopNav,
-        { 
-          backgroundColor: theme.colors.surface,
-          borderRightColor: theme.colors.border,
-        }
-      ]}
-    >
-      {/* Header */}
-      <ThemedView 
-        variant="transparent" 
-        style={[
-          styles.desktopNavHeader,
-          { borderBottomColor: theme.colors.border }
-        ]}
-      >
-        <ThemedText size="lg" weight="semibold" style={{ color: theme.colors.text }}>
-          Menu
-        </ThemedText>
-      </ThemedView>
-      
-      {/* Navigation Items */}
-      <ThemedView variant="transparent" style={styles.navItems}>
-        <TouchableOpacity
-          onPress={() => {setMainView('home'); setCurrentView('home');}}
-          disabled={!selectedFolder}
-          style={[
-            styles.navButton,
-            {
-              backgroundColor: mainView === 'home' ? theme.colors.primary : 'transparent',
-              borderRadius: theme.borderRadius.md,
-            },
-            !selectedFolder && styles.disabledButton
-          ]}
-        >
-          <ThemedText size="xl" style={styles.navIcon}>🏠</ThemedText>
-          <ThemedText 
-            size="base" 
-            weight="medium" 
-            style={{ 
-              color: mainView === 'home' ? theme.colors.background : theme.colors.text,
-              marginLeft: theme.spacing.sm 
-            }}
-          >
-            Home
-          </ThemedText>
-        </TouchableOpacity>
-        
-        {selectedFolder && (
-          <>
-            <TouchableOpacity
-              onPress={() => {setMainView('form'); setCurrentView('home');}}
-              style={[
-                styles.navButton,
-                {
-                  backgroundColor: mainView === 'form' ? theme.colors.primary : 'transparent',
-                  borderRadius: theme.borderRadius.md,
-                }
-              ]}
-            >
-              <ThemedText size="xl" style={styles.navIcon}>📝</ThemedText>
-              <View style={{ marginLeft: theme.spacing.sm, flex: 1 }}>
-                <ThemedText 
-                  size="base" 
-                  weight="medium" 
-                  style={{ 
-                    color: mainView === 'form' ? theme.colors.background : theme.colors.text 
-                  }}
-                >
-                  Form
-                </ThemedText>
-                <ThemedText 
-                  size="sm" 
-                  style={{ 
-                    color: mainView === 'form' ? theme.colors.background : theme.colors.textSecondary,
-                    opacity: 0.75 
-                  }}
-                >
-                  {selectedFolder.name}
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              onPress={() => {setMainView('summary'); setCurrentView('home');}}
-              style={[
-                styles.navButton,
-                {
-                  backgroundColor: mainView === 'summary' ? theme.colors.primary : 'transparent',
-                  borderRadius: theme.borderRadius.md,
-                }
-              ]}
-            >
-              <ThemedText size="xl" style={styles.navIcon}>📄</ThemedText>
-              <View style={{ marginLeft: theme.spacing.sm, flex: 1 }}>
-                <ThemedText 
-                  size="base" 
-                  weight="medium" 
-                  style={{ 
-                    color: mainView === 'summary' ? theme.colors.background : theme.colors.text 
-                  }}
-                >
-                  Summary
-                </ThemedText>
-                <ThemedText 
-                  size="sm" 
-                  style={{ 
-                    color: mainView === 'summary' ? theme.colors.background : theme.colors.textSecondary,
-                    opacity: 0.75 
-                  }}
-                >
-                  {selectedFolder.name}
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-          </>
-        )}
-      </ThemedView>
-      
-      {/* Footer */}
-      <ThemedView 
-        variant="transparent" 
-        style={[
-          styles.desktopNavFooter,
-          { borderTopColor: theme.colors.border }
-        ]}
-      >
-        <ThemedText 
-          size="xs" 
-          style={{ 
-            color: selectedFolder ? theme.colors.success : theme.colors.warning,
-            textAlign: 'center',
-            fontWeight: selectedFolder ? '600' : '400'
-          }}
-        >
-          {selectedFolder ? '✓ Folder Selected' : 'Select a folder to continue'}
-        </ThemedText>
-      </ThemedView>
-    </ThemedView>
-  );
 
   // --- Render ---
   if (currentView === 'document-details' && mainView === "summary" && selectedDocument) {

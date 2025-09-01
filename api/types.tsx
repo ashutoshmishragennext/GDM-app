@@ -98,6 +98,7 @@ export interface SearchDocumentsRequest {
   query?: string;
   metadata?: Record<string, any>;
   tagIds?: string[];
+  userId : string;
   documentTypeId?: string;
   verificationStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
   folderId?: string;

@@ -31,59 +31,95 @@ const CameraGalleryPopup: React.FC<CameraGalleryPopupProps> = ({
   const { theme } = useTheme();
 
   const handleCameraPress = async () => {
-    // Request camera permissions
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera permissions to take photos!');
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets) {
-      const files = result.assets.map(asset => ({
-        uri: asset.uri,
-        type: asset.type,
-        name: `camera_${Date.now()}.jpg`,
-        size: asset.fileSize || 0,
-      }));
+    console.log('Camera button pressed!');
+    
+    try {
+      // Request camera permissions
+      console.log('Requesting camera permissions...');
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      console.log('Camera permission status:', status);
       
-      onFileSelect(files);
-      onClose();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera permissions to take photos!');
+        return;
+      }
+
+      console.log('Launching camera...');
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Try reverting to original
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      console.log('Camera result:', result);
+
+      if (!result.canceled && result.assets) {
+        console.log('Processing camera assets:', result.assets);
+        const files = result.assets.map(asset => ({
+          uri: asset.uri,
+          type: asset.mimeType || 'image/jpeg',
+          name: asset.fileName || `camera_${Date.now()}.jpg`,
+          size: asset.fileSize || 0,
+          width: asset.width,
+          height: asset.height,
+        }));
+        
+        console.log('Mapped files for camera:', files);
+        onFileSelect(files);
+        onClose();
+      } else {
+        console.log('Camera was canceled or no assets');
+      }
+    } catch (error) {
+      console.error('Error in handleCameraPress:', error);
     }
   };
 
   const handleGalleryPress = async () => {
-    // Request media library permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need gallery permissions to select photos!');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: !multiple, // Allow editing only for single selection
-      aspect: [4, 3],
-      quality: 0.8,
-      allowsMultipleSelection: multiple,
-    });
-
-    if (!result.canceled && result.assets) {
-      const files = result.assets.map(asset => ({
-        uri: asset.uri,
-        type: asset.type,
-        name: asset.fileName || `gallery_${Date.now()}.jpg`,
-        size: asset.fileSize || 0,
-      }));
+    console.log('Gallery button pressed!');
+    
+    try {
+      // Request media library permissions
+      console.log('Requesting media library permissions...');
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('Media library permission status:', status);
       
-      onFileSelect(files);
-      onClose();
+      if (status !== 'granted') {
+        alert('Sorry, we need gallery permissions to select photos!');
+        return;
+      }
+
+      console.log('Launching image library...');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Try reverting to original
+        allowsEditing: !multiple, // Allow editing only for single selection
+        aspect: [4, 3],
+        quality: 0.8,
+        allowsMultipleSelection: multiple,
+      });
+
+      console.log('Gallery result:', result);
+
+      if (!result.canceled && result.assets) {
+        console.log('Processing gallery assets:', result.assets);
+        const files = result.assets.map(asset => ({
+          uri: asset.uri,
+          type: asset.mimeType || 'image/jpeg',
+          name: asset.fileName || `gallery_${Date.now()}.jpg`,
+          size: asset.fileSize || 0,
+          width: asset.width,
+          height: asset.height,
+        }));
+        
+        console.log('Mapped files for gallery:', files);
+        onFileSelect(files);
+        onClose();
+      } else {
+        console.log('Gallery was canceled or no assets');
+      }
+    } catch (error) {
+      console.error('Error in handleGalleryPress:', error);
     }
   };
 
