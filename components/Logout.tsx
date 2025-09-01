@@ -1,22 +1,24 @@
 // components/Dashboard.tsx
+import { useAuth } from '@/context/AuthContext';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Alert, // Add Modal import
+  Image,
+  Modal,
   SafeAreaView,
-  Alert,
-  Modal, // Add Modal import
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useAuth } from '@/context/AuthContext';
+import { ThemedView } from './utils/ThemeComponents';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
-
+  const theme = useTheme();
   const handleLogout = () => {
-    console.log('Logout button pressed!'); // This should log now
     setShowDropdown(false);
     Alert.alert(
       'Logout',
@@ -27,7 +29,6 @@ export default function Dashboard() {
           text: 'Logout',
           style: 'destructive',
           onPress: () => {
-            console.log('Confirmed logout');
             logout();
           },
         },
@@ -36,12 +37,10 @@ export default function Dashboard() {
   };
 
   const toggleDropdown = () => {
-    console.log('Toggling dropdown:', !showDropdown);
     setShowDropdown(!showDropdown);
   };
 
   const closeDropdown = () => {
-    console.log('Closing dropdown');
     setShowDropdown(false);
   };
 
@@ -52,25 +51,34 @@ export default function Dashboard() {
         {/* Logo Section */}
         <View style={styles.logoContainer}>
           <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>LOGO</Text>
+            <Image
+              source={{ uri: 'https://www.gennextit.com/assets/Frontend/logo/Gennextlogoxdarkblue.png' }}
+              height={40}
+              width={120}
+            />
           </View>
+
         </View>
 
         {/* User Menu Section */}
         <View style={styles.userMenuContainer}>
-          <TouchableOpacity 
-            style={styles.userButton} 
+          <TouchableOpacity
+            style={styles.userButton}
             onPress={toggleDropdown}
             activeOpacity={0.7}
           >
-            <View style={styles.avatar}>
+            <ThemedView
+              variant="transparent"
+              style={[styles.avatar, {
+                backgroundColor: theme.theme.colors.primary,
+              }]}>
               <Text style={styles.avatarText}>
                 {user?.name?.charAt(0).toUpperCase()}
               </Text>
-            </View>
-            
+            </ThemedView>
+
             <Text style={styles.userName}>{user?.name}</Text>
-            
+
             <Text style={[styles.dropdownArrow, showDropdown && styles.dropdownArrowUp]}>
               ▼
             </Text>
@@ -83,38 +91,36 @@ export default function Dashboard() {
             animationType="fade"
             onRequestClose={closeDropdown}
           >
-            <TouchableOpacity 
-            className=''
-              style={styles.modalOverlay} 
+            <TouchableOpacity
+              className=''
+              style={styles.modalOverlay}
               onPress={closeDropdown}
               activeOpacity={1}
             >
               <View style={styles.dropdownContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.dropdownItem}
                   onPress={() => {
-                    console.log('Profile pressed');
                     closeDropdown();
                   }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.dropdownItemText}>Profile</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={styles.dropdownItem}
                   onPress={() => {
-                    console.log('Settings pressed');
                     closeDropdown();
                   }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.dropdownItemText}>Settings</Text>
                 </TouchableOpacity>
-                
+
                 <View style={styles.dropdownSeparator} />
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.dropdownItem, styles.logoutItem]}
                   onPress={handleLogout}
                   activeOpacity={0.7}
@@ -134,31 +140,29 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-  
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingVertical: 6,
     borderBottomColor: '#eee',
-    elevation: 2,
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  
+
   // Logo Styles
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   logoPlaceholder: {
-    width: 40,
     height: 40,
-    backgroundColor: '#1e90ff',
+    width: 120,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  
+
   // User Menu Styles
   userMenuContainer: {
     position: 'relative',
@@ -185,7 +189,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#1e90ff',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
@@ -209,7 +212,7 @@ const styles = StyleSheet.create({
   dropdownArrowUp: {
     transform: [{ rotate: '180deg' }],
   },
-  
+
   // Modal and Dropdown Styles
   modalOverlay: {
     flex: 1,
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
     color: '#ff4444',
     fontWeight: '600',
   },
-  
+
   // Content Styles
   content: {
     flex: 1,

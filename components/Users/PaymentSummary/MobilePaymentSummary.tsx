@@ -233,7 +233,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
       ]} className=' pb-14' variant="background">
       <View className={`min-h-screen bg-gradient-to-br from-slate-50 to-red-50`}>
         {/* Header */}
-        <View className={`bg-red-600 text-white shadow-lg sticky top-0`}>
+        <ThemedView style={[{backgroundColor : theme.colors.primary}]} className={` text-white shadow-lg sticky top-0`}>
           <View className="px-2 py-4">
             <View className="text-center flex flex-row justify-center gap-4">
               <ThemedText size="xl" weight="bold" className="text-white">
@@ -333,7 +333,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
               </View>
             )}
           </View>
-        </View>
+        </ThemedView>
 
         {/* Content */}
         <ScrollView className="px-4 py-4" showsVerticalScrollIndicator={false}>
