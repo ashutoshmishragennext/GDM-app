@@ -1,33 +1,11 @@
 import Logout from '@/components/Logout';
 import DocumentManagementDashboard from '@/components/Users/EntryPage';
-import React, { useEffect } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import * as NavigationBar from 'expo-navigation-bar';
+import React from 'react';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SuperAdminDashboard() {
   
-  useEffect(() => {
-    const setupEdgeToEdge = async () => {
-      if (Platform.OS === 'android') {
-        try {
-          // Only use methods that work with edge-to-edge
-          await NavigationBar.setVisibilityAsync('hidden');
-          
-          // These methods work with edge-to-edge:
-          await NavigationBar.setButtonStyleAsync('dark'); // or 'light'
-          
-          // Make navigation bar transparent (this works)
-          await NavigationBar.setBackgroundColorAsync('transparent');
-        } catch (error) {
-          console.error('Navigation bar setup error:', error);
-        }
-      }
-    };
-    
-    setupEdgeToEdge();
-  }, []);
-
   return (
     <>
       <StatusBar 
