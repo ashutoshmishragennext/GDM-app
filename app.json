@@ -28,7 +28,11 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.ranurag404.MyRoleBasedApp"
     },
     "web": {
       "bundler": "metro",
@@ -57,6 +61,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "da769e07-db57-491e-9fb4-9c2c2a50f467"
+      }
+    },
+    "owner": "ranurag404"
   }
 }
