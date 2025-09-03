@@ -1,18 +1,10 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import { View, Text } from 'react-native';
 
-export default function UserLayout() {
+export default function SuperAdminIndex() {
   return (
-    <Stack  
-      screenOptions={{ 
-        headerShown: false // Hide default header since NewsApp has custom header
-      }}
-    >
-      <Stack.Screen 
-        name="index" 
-        options={{ title: 'Dashboard' }} 
-      />
-      {/* Add more screens if needed in future */}
-    </Stack>
+    <View>
+      <Text>Super Admin Dashboard</Text>
+    </View>
   );
 }

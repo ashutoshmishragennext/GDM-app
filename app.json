@@ -9,17 +9,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
-    "permissions": [
-      "CAMERA",
-      "WRITE_EXTERNAL_STORAGE",
-      "READ_EXTERNAL_STORAGE"
-    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "NSCameraUsageDescription": "This app uses camera to take photos",
+        "NSPhotoLibraryUsageDescription": "This app uses photo library to select images"
       }
     },
     "android": {
@@ -28,8 +25,10 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "usesCleartextTraffic": true,
       "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.ranurag404.MyRoleBasedApp"
@@ -65,7 +64,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "da769e07-db57-491e-9fb4-9c2c2a50f467"
+        "projectId": "da769e07-db57-491e-9fb4-9c2c50f467"
       }
     },
     "owner": "ranurag404"
