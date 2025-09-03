@@ -1,21 +1,18 @@
-import React, { useEffect } from "react";
-import { Stack, useRouter } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
+import React from 'react';
+import { Stack } from 'expo-router';
 
 export default function UserLayout() {
-  const { user } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!user) {
-      // No user logged in → back to login
-      router.replace("/login");
-    } else if (user.role !== "USER") {
-      // Wrong role → redirect to correct dashboard
-      if (user.role === "ADMIN") router.replace("/dashboard");
-      if (user.role === "SUPER_ADMIN") router.replace("/dashboard");
-    }
-  }, [user]);
-
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack  
+      screenOptions={{ 
+        headerShown: false // Hide default header since NewsApp has custom header
+      }}
+    >
+      <Stack.Screen 
+        name="index" 
+        options={{ title: 'Dashboard' }} 
+      />
+      {/* Add more screens if needed in future */}
+    </Stack>
+  );
 }
