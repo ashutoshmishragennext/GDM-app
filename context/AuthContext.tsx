@@ -1,5 +1,6 @@
+// context/AuthContext.tsx
 import { apiService } from '@/api';
-import { clearCookies } from '@/utils/cookieUtils';
+import { clearCookies, getCookies } from '@/utils/cookieUtils';
 import { useRouter, useSegments } from 'expo-router';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
@@ -60,64 +61,89 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [user, segments, isLoading, initialNavigation]);
 
+
   const AUTH_TOKEN_KEY = 'auth_token';
   const USER_DATA_KEY = 'user_data';
 
-  const loadUserFromStorage = async () => {
-    try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
-      const userData = await SecureStore.getItemAsync(USER_DATA_KEY);
 
-      if (token && userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        console.log('User restored from SecureStore:', parsedUser);
-      } else {
-        console.log('No valid session found');
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-    } finally {
-      setIsLoading(false);
+  const loadUserFromStorage = async () => {
+  try {
+    // Check both token and user data
+    const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+    const userData = await SecureStore.getItemAsync(USER_DATA_KEY);
+    
+    if (token && userData) {
+      const user = JSON.parse(userData);
+      setUser(user);
+      console.log('User restored from SecureStore:', user);
+    } else {
+      console.log('No valid session found');
     }
-  };
+  } catch (error) {
+    console.error('Error loading user:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleInitialNavigation = () => {
     if (user) {
+      // User is logged in - redirect to dashboard
       redirectToDashboard(user.role);
     } else {
+      // User is not logged in - ensure they're on login page
       router.replace('/login');
     }
   };
 
   const handleRouteProtection = () => {
     const inAuthGroup = segments[0] === '(auth)';
-
+    
     if (!user) {
+      // User not logged in - redirect to login if not already there
       if (!inAuthGroup) {
         router.replace('/login');
       }
     } else {
+      // User is logged in
       if (inAuthGroup) {
+        // User is logged in but on auth page - redirect to dashboard
         redirectToDashboard(user.role);
+      } else {
+        // Check if user is accessing correct role-based route
+        const currentRoleGroup = segments[0];
+        const expectedRoleGroup = getRoleGroup(user.role);
+        
+        if (currentRoleGroup && currentRoleGroup.startsWith('(') && currentRoleGroup !== expectedRoleGroup) {
+          redirectToDashboard(user.role);
+        }
       }
     }
   };
 
-  // 🔑 Simplified: no group names, just dashboard
-  const redirectToDashboard = (role: string) => {
-    if (['SUPER_ADMIN', 'ADMIN', 'USER'].includes(role)) {
-      router.replace('/dashboard');
-    } else {
-      router.replace('/login');
+  const getRoleGroup = (role: string): string => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return '(super-admin)';
+      case 'ADMIN':
+        return '(admin)';
+      case 'USER':
+        return '(user)';
+      default:
+        return '(user)';
     }
+  };
+
+  const redirectToDashboard = (role: string) => {
+    const roleGroup = getRoleGroup(role);
+    router.replace(`${roleGroup}/dashboard` as any);
   };
 
   const login = async (email: string, password: string) => {
     try {
       const response = await apiService.login({ email, password });
       setUser(response.user);
-      // navigation handled by useEffect
+      // Navigation will be handled by useEffect
     } catch (error) {
       throw error;
     }
@@ -131,7 +157,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       setUser(null);
       await clearCookies();
-      setInitialNavigation(false);
+      setInitialNavigation(false); // Reset for next login
       router.replace('/login');
     }
   };
