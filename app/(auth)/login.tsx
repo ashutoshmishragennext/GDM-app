@@ -1,4 +1,3 @@
-// app/(auth)/login.tsx
 import { useAuth } from '@/context/AuthContext';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
@@ -20,30 +19,30 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login , user } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
 
-    const getRoleGroup = (role: string): string => {
-    switch (role) {
-      case 'SUPER_ADMIN':
-        return '(super-admin)';
-      case 'ADMIN':
-        return '(admin)';
-      case 'USER':
-        return '(user)';
-      default:
-        return '(user)';
-    }
-  };
+  // Just decide the target path (no groups in paths)
+const getRoleRedirect = (
+  role: string
+): "/dashboard" | "/login" => {
+  switch (role) {
+    case "SUPER_ADMIN":
+    case "ADMIN":
+    case "USER":
+      return "/dashboard";
+    default:
+      return "/login";
+  }
+};
 
-  useEffect(() => {    
-      if(user?.role) {
-        console.log("user in login", user);
-        // Redirect to dashboard if user is already logged in
-        const role = getRoleGroup(user.role);
-        router.replace(`${role}/dashboard` as any);
-      }
-  }, [user?.role])
+  useEffect(() => {
+    if (user?.role) {
+      console.log('user in login', user);
+      const path = getRoleRedirect(user.role);
+      router.replace(path);
+    }
+  }, [user?.role]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -73,9 +72,7 @@ export default function LoginScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Full screen blur & dark layer */}
         <BlurView intensity={70} tint="dark" style={styles.fullOverlay}>
-          {/* Card wrapper */}
           <View style={styles.card}>
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Sign in to continue</Text>
@@ -115,12 +112,10 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Forgot Password */}
             <TouchableOpacity style={styles.linkWrapper}>
               <Text style={styles.linkText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            {/* Signup option */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don’t have an account?</Text>
               <TouchableOpacity>
@@ -146,7 +141,7 @@ const styles = StyleSheet.create({
   fullOverlay: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.35)', // dark layer + blur
+    backgroundColor: 'rgba(0,0,0,0.35)',
     padding: 24,
   },
   card: {
