@@ -11,6 +11,7 @@
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.ranurag404.MyRoleBasedApp",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -27,8 +28,6 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.ranurag404.MyRoleBasedApp"
