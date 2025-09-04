@@ -12,11 +12,12 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // or whatever icon library you're using
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemedView, ThemedText, ThemedButton } from '@/components/utils/ThemeComponents';
 import { apiService } from '@/api';
-import CameraGalleryPopup from '@/components/common/MobileCameraInput';
 
 const { width, height } = Dimensions.get('window');
 
@@ -89,7 +90,6 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
   const [aiProcessing, setAiProcessing] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiSuccess, setAiSuccess] = useState<string | null>(null);
-  const [activePopup, setActivePopup] = useState<string | null>(null);
   const [imageViewer, setImageViewer] = useState<{
     isOpen: boolean;
     images: string[];
@@ -101,20 +101,112 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
     currentIndex: 0,
   });
 
+  const [cameraLoading, setCameraLoading] = useState<string | null>(null);
+  const [galleryLoading, setGalleryLoading] = useState<string | null>(null);
+  
   const getImageUrl = (item: any): string => {
     return typeof item === 'string' ? item : item?.url || '';
   };
 
-  const openImagePopup = (fieldKey: string) => {
-    setActivePopup(fieldKey);
+const handleCameraPress = async (fieldKey: string) => {
+    console.log('Camera button pressed for field:', fieldKey);
+    setCameraLoading(fieldKey); // Set camera loading state
+    
+    try {
+      console.log('Requesting camera permissions...');
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      console.log('Camera permission status:', status);
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Sorry, we need camera permissions to take photos!');
+        return;
+      }
+
+      console.log('Launching camera...');
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      console.log('Camera result:', result);
+
+      if (!result.canceled && result.assets) {
+        console.log('Processing camera assets:', result.assets);
+        const files = result.assets.map(asset => ({
+          uri: asset.uri,
+          type: asset.mimeType || 'image/jpeg',
+          name: asset.fileName || `camera_${Date.now()}.jpg`,
+          size: asset.fileSize || 0,
+          width: asset.width,
+          height: asset.height,
+        }));
+        
+        console.log('Mapped files for camera:', files);
+        handleFileChange(fieldKey, files);
+      } else {
+        console.log('Camera was canceled or no assets');
+      }
+    } catch (error) {
+      console.error('Error in handleCameraPress:', error);
+      Alert.alert('Error', 'Failed to open camera. Please try again.');
+    } finally {
+      setCameraLoading(null); // Clear camera loading state
+    }
   };
 
-  const closeImagePopup = () => {
-    setActivePopup(null);
-  };
+  // Updated Gallery functionality with separate loading state
+  const handleGalleryPress = async (fieldKey: string) => {
+    console.log('Gallery button pressed for field:', fieldKey);
+    setGalleryLoading(fieldKey); // Set gallery loading state
+    
+    try {
+      console.log('Requesting media library permissions...');
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('Media library permission status:', status);
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Sorry, we need gallery permissions to select photos!');
+        return;
+      }
 
-  const handlePopupFileSelect = (fieldKey: string, files: any) => {
-    handleFileChange(fieldKey, files);
+      const fieldConfig = fileFields.find(f => f.key === fieldKey);
+      const multiple = fieldConfig?.field.type === 'files';
+
+      console.log('Launching image library...');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: !multiple,
+        aspect: [4, 3],
+        quality: 0.8,
+        allowsMultipleSelection: multiple,
+      });
+
+      console.log('Gallery result:', result);
+
+      if (!result.canceled && result.assets) {
+        console.log('Processing gallery assets:', result.assets);
+        const files = result.assets.map(asset => ({
+          uri: asset.uri,
+          type: asset.mimeType || 'image/jpeg',
+          name: asset.fileName || `gallery_${Date.now()}.jpg`,
+          size: asset.fileSize || 0,
+          width: asset.width,
+          height: asset.height,
+        }));
+        
+        console.log('Mapped files for gallery:', files);
+        handleFileChange(fieldKey, files);
+      } else {
+        console.log('Gallery was canceled or no assets');
+      }
+    } catch (error) {
+      console.error('Error in handleGalleryPress:', error);
+      Alert.alert('Error', 'Failed to open gallery. Please try again.');
+    } finally {
+      setGalleryLoading(null); // Clear gallery loading state
+    }
   };
 
   const openImageViewer = (images: any[], startIndex: number, fieldKey?: string) => {
@@ -247,6 +339,22 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
       setAiProcessing(null);
     }
   };
+  const getFieldIcon = (fieldType: string): string | undefined => {
+  const iconMap: Record<string, string> = {
+    email: '✉️',
+    phone: '📞',
+    landline: '☎️',
+    number: '🔢',
+    amount: '💰',
+    date: '📅',
+    description: '📝',
+    select: '📋',
+    boolean: '✓',
+    // Add more field type mappings as needed
+  };
+  return iconMap[fieldType];
+};
+
 
   const validateField = (key: string, value: any, field: MetadataField, isRequired: boolean): string => {
     if (isRequired && (!value || (typeof value === 'string' && value.trim() === ''))) {
@@ -337,36 +445,45 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
     }
   };
 
-  const renderField = (key: string, field: MetadataField, parentSchema: any) => {
-    const isRequired = parentSchema.required?.includes(key);
-    const hasError = validationErrors[key];
+const renderField = (key: string, field: MetadataField, parentSchema: any, icon?: string) => {
+  const isRequired = parentSchema.required?.includes(key);
+  const hasError = validationErrors[key];
 
-    const handleInputChange = (newValue: string) => {
-      setValues({ ...values, [key]: newValue });
+  const handleInputChange = (newValue: string) => {
+    setValues({ ...values, [key]: newValue });
 
-      if (hasError) {
-        const newErrors = { ...validationErrors };
-        delete newErrors[key];
-        setValidationErrors(newErrors);
-      }
-    };
+    if (hasError) {
+      const newErrors = { ...validationErrors };
+      delete newErrors[key];
+      setValidationErrors(newErrors);
+    }
+  };
 
-    const inputStyle = [
-      styles.textInput,
-      {
-        borderColor: hasError ? theme.colors.error : theme.colors.border,
-        backgroundColor: theme.colors.background,
-        color: theme.colors.text,
-      }
-    ];
+  const inputStyle = [
+    styles.textInput,
+    {
+      borderColor: hasError ? theme.colors.error : theme.colors.border,
+      backgroundColor: theme.colors.background,
+      color: theme.colors.text,
+      paddingLeft: icon ? 44 : 16, // Extra padding when icon is present
+    }
+  ];
 
-    switch (field.type) {
-      case 'number':
-      case 'amount':
-        return (
-          <View style={styles.inputContainer}>
-            {field.type === 'amount' && (
-              <View style={styles.amountContainer}>
+  const placeholderText = `${field.description || key}${isRequired ? ' *' : ''}`;
+
+  switch (field.type) {
+    case 'number':
+    case 'amount':
+      return (
+        <View style={styles.inputContainer}>
+          {field.type === 'amount' && (
+            <View style={styles.amountContainer}>
+              <View style={styles.inputWrapper}>
+                {icon && (
+                  <Text style={[styles.inputIcon, { color: theme.colors.textSecondary }]}>
+                    {icon}
+                  </Text>
+                )}
                 <TextInput
                   style={[inputStyle, styles.amountInput]}
                   value={values[key]?.toString() || ''}
@@ -378,19 +495,27 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                       handleInputChange('');
                     }
                   }}
-                  placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
+                  placeholder={placeholderText}
+                  placeholderTextColor={theme.colors.textSecondary}
                   keyboardType="decimal-pad"
                 />
-                {field.currency && (
-                  <View style={[styles.currencyLabel, { backgroundColor: theme.colors.surface }]}>
-                    <ThemedText size="sm" weight="medium">
-                      {field.currency.toUpperCase()}
-                    </ThemedText>
-                  </View>
-                )}
               </View>
-            )}
-            {field.type === 'number' && (
+              {field.currency && (
+                <View style={[styles.currencyLabel, { backgroundColor: theme.colors.surface }]}>
+                  <ThemedText size="sm" weight="medium">
+                    {field.currency.toUpperCase()}
+                  </ThemedText>
+                </View>
+              )}
+            </View>
+          )}
+          {field.type === 'number' && (
+            <View style={styles.inputWrapper}>
+              {icon && (
+                <Text style={[styles.inputIcon, { color: theme.colors.textSecondary }]}>
+                  {icon}
+                </Text>
+              )}
               <TextInput
                 style={inputStyle}
                 value={values[key]?.toString() || ''}
@@ -402,41 +527,57 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                     handleInputChange('');
                   }
                 }}
-                placeholder="0.00"
+                placeholder={placeholderText}
+                placeholderTextColor={theme.colors.textSecondary}
                 keyboardType="decimal-pad"
               />
-            )}
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
-          </View>
-        );
+            </View>
+          )}
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      case 'email':
-        return (
-          <View style={styles.inputContainer}>
+    case 'email':
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIcon, { color: theme.colors.textSecondary }]}>
+                {icon}
+              </Text>
+            )}
             <TextInput
               style={inputStyle}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
+              placeholder={placeholderText}
+              placeholderTextColor={theme.colors.textSecondary}
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      case 'phone':
-      case 'landline':
-        return (
-          <View style={styles.inputContainer}>
+    case 'phone':
+    case 'landline':
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIcon, { color: theme.colors.textSecondary }]}>
+                {icon}
+              </Text>
+            )}
             <TextInput
               style={inputStyle}
               value={values[key] || ''}
@@ -444,28 +585,48 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 const cleaned = text.replace(/[^0-9+\-\s()]/g, '');
                 handleInputChange(cleaned);
               }}
-              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
+              placeholder={placeholderText}
+              placeholderTextColor={theme.colors.textSecondary}
               keyboardType="phone-pad"
             />
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      case 'select':
-        return (
-          <View style={styles.inputContainer}>
-            <View style={[styles.pickerContainer, { borderColor: hasError ? theme.colors.error : theme.colors.border }]}>
+    case 'select':
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIcon, { color: theme.colors.textSecondary, zIndex: 1 }]}>
+                {icon}
+              </Text>
+            )}
+            <View style={[
+              styles.pickerContainer,
+              {
+                borderColor: hasError ? theme.colors.error : theme.colors.border,
+                backgroundColor: theme.colors.background,
+              }
+            ]}>
               <Picker
                 selectedValue={values[key] || ''}
                 onValueChange={(itemValue) => handleInputChange(itemValue)}
-                style={[styles.picker, { color: theme.colors.text }]}
+                style={[
+                  styles.picker,
+                  {
+                    color: theme.colors.text,
+                    marginLeft: icon ? 28 : 0, // Adjust for icon space
+                  }
+                ]}
               >
                 <Picker.Item
-                  label={`Select ${(field.description || key).replace(' field', '')}`}
+                  label={placeholderText}
                   value=""
                   color={theme.colors.textSecondary}
                 />
@@ -474,25 +635,44 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 ))}
               </Picker>
             </View>
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      case 'boolean':
-        return (
-          <View style={styles.inputContainer}>
-            <View style={[styles.pickerContainer, { borderColor: hasError ? theme.colors.error : theme.colors.border }]}>
+    case 'boolean':
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIcon, { color: theme.colors.textSecondary, zIndex: 1 }]}>
+                {icon}
+              </Text>
+            )}
+            <View style={[
+              styles.pickerContainer,
+              {
+                borderColor: hasError ? theme.colors.error : theme.colors.border,
+                backgroundColor: theme.colors.background,
+              }
+            ]}>
               <Picker
                 selectedValue={values[key] || ''}
                 onValueChange={(itemValue) => handleInputChange(itemValue)}
-                style={[styles.picker, { color: theme.colors.text }]}
+                style={[
+                  styles.picker,
+                  {
+                    color: theme.colors.text,
+                    marginLeft: icon ? 28 : 0, // Adjust for icon space
+                  }
+                ]}
               >
                 <Picker.Item
-                  label={`Select ${(field.description || key).replace(' field', '')}`}
+                  label={placeholderText}
                   value=""
                   color={theme.colors.textSecondary}
                 />
@@ -500,69 +680,94 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
                 <Picker.Item label="No" value="false" />
               </Picker>
             </View>
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      case 'date':
-        return (
-          <View style={styles.inputContainer}>
+    case 'date':
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIcon, { color: theme.colors.textSecondary }]}>
+                {icon}
+              </Text>
+            )}
             <TextInput
               style={inputStyle}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder="YYYY-MM-DD"
+              placeholder={`${placeholderText} (YYYY-MM-DD)`}
+              placeholderTextColor={theme.colors.textSecondary}
             />
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      case 'description':
-        return (
-          <View style={styles.inputContainer}>
+    case 'description':
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIconTextArea, { color: theme.colors.textSecondary }]}>
+                {icon}
+              </Text>
+            )}
             <TextInput
               style={[inputStyle, styles.textArea]}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
+              placeholder={placeholderText}
+              placeholderTextColor={theme.colors.textSecondary}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
             />
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
 
-      default:
-        return (
-          <View style={styles.inputContainer}>
+    default:
+      return (
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            {icon && (
+              <Text style={[styles.inputIcon, { color: theme.colors.textSecondary }]}>
+                {icon}
+              </Text>
+            )}
             <TextInput
               style={inputStyle}
               value={values[key] || ''}
               onChangeText={handleInputChange}
-              placeholder={`Enter ${field.description} ${isRequired ? '*' : ''}`}
+              placeholder={placeholderText}
+              placeholderTextColor={theme.colors.textSecondary}
             />
-            {hasError && (
-              <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
-                {hasError}
-              </ThemedText>
-            )}
           </View>
-        );
-    }
-  };
+          {hasError && (
+            <ThemedText size="xs" style={{ color: theme.colors.error, marginTop: theme.spacing.xs }}>
+              {hasError}
+            </ThemedText>
+          )}
+        </View>
+      );
+  }
+};
 
   const getAllFields = () => {
     const allFields: any[] = [];
@@ -599,56 +804,51 @@ const MobilePaymentForm: React.FC<MobilePaymentFormProps> = ({
     return allFields.sort((a, b) => (a.field.priority || 999) - (b.field.priority || 999));
   };
 
-  const getMultipleForField = (fieldKey: string | null): boolean => {
-    if (!fieldKey) return true;
-    const fieldConfig = getAllFields().find(({ key }) => key === fieldKey);
-    return fieldConfig?.field.type === 'files';
-  };
-
   const sortedFields = getAllFields();
 
-// Updated deleteCurrentImage function for React Native
-const deleteCurrentImage = () => {
-  const currentFieldKey = Object.keys(values).find(key => {
-    const fieldValue = values[key];
-    if (Array.isArray(fieldValue)) {
-      return fieldValue.some(item =>
-        getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
-      );
-    } else if (fieldValue) {
-      return getImageUrl(fieldValue) === imageViewer.images[imageViewer.currentIndex];
-    }
-    return false;
-  });
-
-  if (currentFieldKey) {
-    const fieldValue = values[currentFieldKey];
-    if (Array.isArray(fieldValue)) {
-      const imageIndex = fieldValue.findIndex(item =>
-        getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
-      );
-      if (imageIndex !== -1) {
-        removeUrl(currentFieldKey, imageIndex);
-
-        const newImages = imageViewer.images.filter((_, idx) => idx !== imageViewer.currentIndex);
-        if (newImages.length === 0) {
-          closeImageViewer();
-        } else {
-          const newIndex = imageViewer.currentIndex >= newImages.length ?
-            newImages.length - 1 : imageViewer.currentIndex;
-          setImageViewer(prev => ({
-            ...prev,
-            images: newImages,
-            currentIndex: newIndex
-          }));
-        }
+  // Updated deleteCurrentImage function for React Native
+  const deleteCurrentImage = () => {
+    const currentFieldKey = Object.keys(values).find(key => {
+      const fieldValue = values[key];
+      if (Array.isArray(fieldValue)) {
+        return fieldValue.some(item =>
+          getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
+        );
+      } else if (fieldValue) {
+        return getImageUrl(fieldValue) === imageViewer.images[imageViewer.currentIndex];
       }
-    } else {
-      removeUrl(currentFieldKey, 0);
-      closeImageViewer();
+      return false;
+    });
+
+    if (currentFieldKey) {
+      const fieldValue = values[currentFieldKey];
+      if (Array.isArray(fieldValue)) {
+        const imageIndex = fieldValue.findIndex(item =>
+          getImageUrl(item) === imageViewer.images[imageViewer.currentIndex]
+        );
+        if (imageIndex !== -1) {
+          removeUrl(currentFieldKey, imageIndex);
+
+          const newImages = imageViewer.images.filter((_, idx) => idx !== imageViewer.currentIndex);
+          if (newImages.length === 0) {
+            closeImageViewer();
+          } else {
+            const newIndex = imageViewer.currentIndex >= newImages.length ?
+              newImages.length - 1 : imageViewer.currentIndex;
+            setImageViewer(prev => ({
+              ...prev,
+              images: newImages,
+              currentIndex: newIndex
+            }));
+          }
+        }
+      } else {
+        removeUrl(currentFieldKey, 0);
+        closeImageViewer();
+      }
     }
-  }
-};
+  };
+
   return (
     <ThemedView variant="background" style={{ flex: 1 }}>
       <ScrollView
@@ -788,46 +988,75 @@ const deleteCurrentImage = () => {
                     <View style={styles.uploadSection}>
                       {/* Main Row Container */}
                       <View style={styles.uploadRow}>
-                        {/* Upload Button */}
-                        <TouchableOpacity
-                          style={[
-                            styles.uploadButton,
-                            {
-                              borderColor: hasError ? theme.colors.error : theme.colors.border,
-                              backgroundColor: uploadingKey === key ? theme.colors.surface : 'transparent',
-                            }
-                          ]}
-                          onPress={() => openImagePopup(key)}
-                          disabled={uploadingKey === key}
-                        >
-                          {uploadingKey === key ? (
-                            <View style={styles.uploadingContent}>
-                              <ActivityIndicator
-                                size="small"
-                                color={theme.colors.primary}
-                              />
-                              <ThemedText
-                                size="xs"
-                                style={{
-                                  color: theme.colors.textSecondary,
-                                  marginTop: 2
-                                }}
-                              >
-                                Uploading...
-                              </ThemedText>
-                            </View>
-                          ) : (
-                            <View style={styles.uploadContent}>
-                              <Text style={[styles.uploadIcon, { color: theme.colors.primary }]}>📷</Text>
-                              <ThemedText
-                                size="xs"
-                                weight="medium"
-                                style={{ color: theme.colors.primary }}
-                              >
-                                Upload
-                              </ThemedText>
-                            </View>
-                          )}
+                        {/* Camera and Gallery Buttons */}
+ <View style={styles.cameraGalleryContainer}>
+                          {/* Camera Button */}
+                          <TouchableOpacity
+                            style={[
+                              styles.cameraGalleryButton,
+                              {
+                                borderColor: hasError ? theme.colors.error : theme.colors.primary,
+                                backgroundColor: `${theme.colors.primary}10`,
+                                opacity: cameraLoading === key ? 0.7 : 1,
+                              }
+                            ]}
+                            onPress={() => handleCameraPress(key)}
+                            disabled={cameraLoading === key || galleryLoading === key}
+                          >
+                            {cameraLoading === key ? (
+                              <ActivityIndicator size="small" color={theme.colors.primary} />
+                            ) : (
+                              <View style={styles.cameraGalleryContent}>
+                                <Ionicons 
+                                  name="camera" 
+                                  size={20} 
+                                  color={theme.colors.primary} 
+                                  style={styles.cameraGalleryIcon}
+                                />
+                                <ThemedText
+                                  size="xs"
+                                  weight="medium"
+                                  style={{ color: theme.colors.primary }}
+                                >
+                                  Camera
+                                </ThemedText>
+                              </View>
+                            )}
+                          </TouchableOpacity>
+
+                          {/* Gallery Button */}
+                          <TouchableOpacity
+                            style={[
+                              styles.cameraGalleryButton,
+                              {
+                                borderColor: hasError ? theme.colors.error : theme.colors.success,
+                                backgroundColor: `${theme.colors.success}10`,
+                                opacity: galleryLoading === key ? 0.7 : 1,
+                              }
+                            ]}
+                            onPress={() => handleGalleryPress(key)}
+                            disabled={cameraLoading === key || galleryLoading === key}
+                          >
+                            {galleryLoading === key ? (
+                              <ActivityIndicator size="small" color={theme.colors.success} />
+                            ) : (
+                              <View style={styles.cameraGalleryContent}>
+                                <Ionicons 
+                                  name="images" 
+                                  size={20} 
+                                  color={theme.colors.success} 
+                                  style={styles.cameraGalleryIcon}
+                                />
+                                <ThemedText
+                                  size="xs"
+                                  weight="medium"
+                                  style={{ color: theme.colors.success }}
+                                >
+                                  Gallery
+                                </ThemedText>
+                              </View>
+                            )}
+                          </TouchableOpacity>
 
                           {/* Count Badge */}
                           {values[key] && (
@@ -849,14 +1078,13 @@ const deleteCurrentImage = () => {
                                 </ThemedText>
                               </View>
                             )}
-                        </TouchableOpacity>
-
+                        </View>
                         {/* Preview and AI Button Container */}
                         {values[key] && (
                           (Array.isArray(values[key]) && values[key].length > 0) ||
                           (!Array.isArray(values[key]) && values[key])
                         ) && (
-                            <View style={styles.previewAiContainer }>
+                            <View style={styles.previewAiContainer}>
                               {/* Preview Thumbnails */}
                               <ScrollView
                                 horizontal
@@ -910,7 +1138,7 @@ const deleteCurrentImage = () => {
                                   </View>
                                 ) : (
                                   <View style={styles.aiContent}>
-                                    <Text style={[styles.aiIcon, { color: theme.colors.info }]}>⚡</Text>
+                                    <Text className=' m-auto' style={[styles.aiIcon, { color: theme.colors.info }]}>⚡</Text>
                                     <ThemedText
                                       size="xs"
                                       weight="medium"
@@ -941,21 +1169,8 @@ const deleteCurrentImage = () => {
                 ) : (
                   // Regular form field
                   <View>
-                    {/* <ThemedText
-                      size="sm"
-                      weight="medium"
-                      style={{
-                        color: theme.colors.text,
-                        marginBottom: theme.spacing.sm
-                      }}
-                    >
-                      {(field.description || key).replace(' field', '')}
-                      {isRequired && (
-                        <Text style={{ color: theme.colors.error }}> *</Text>
-                      )}
-                    </ThemedText> */}
 
-                    {renderField(key, field, parentSchema )}
+                    {renderField(key, field, parentSchema)}
                   </View>
                 )}
               </View>
@@ -1002,19 +1217,6 @@ const deleteCurrentImage = () => {
           </TouchableOpacity>
         </ThemedView>
       </ScrollView>
-
-      {/* Camera Gallery Popup */}
-      <CameraGalleryPopup
-        isOpen={activePopup !== null}
-        onClose={closeImagePopup}
-        onFileSelect={(files) => {
-          if (activePopup) {
-            handlePopupFileSelect(activePopup, files);
-          }
-        }}
-        accept="image/*"
-        multiple={getMultipleForField(activePopup)}
-      />
 
       {/* Full Screen Image Viewer */}
       <Modal
@@ -1104,6 +1306,7 @@ const deleteCurrentImage = () => {
     </ThemedView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -1151,6 +1354,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
+  },
+
+  // New Camera/Gallery Container Styles
+  cameraGalleryContainer: {
+    flexDirection: 'row',
+    gap: 6,
+    position: 'relative',
+    flexShrink: 0,
+  },
+
+  cameraGalleryButton: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 70,
+    width: 70,
+  },
+
+  cameraGalleryContent: {
+    alignItems: 'center',
+    gap: 2,
+  },
+
+  cameraGalleryIcon: {
+    fontSize: 20,
   },
 
   uploadButton: {
@@ -1234,8 +1464,9 @@ const styles = StyleSheet.create({
   },
 
   aiContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    // flexDirection: 'row',
+    textAlign : 'center',
+    alignItems:'flex-start',
     gap: 2,
   },
 
@@ -1252,45 +1483,6 @@ const styles = StyleSheet.create({
   },
   errorIcon: {
     fontSize: 14,
-  },
-  inputContainer: {
-    // Container for regular inputs
-  },
-  textInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-  },
-  amountContainer: {
-    flexDirection: 'row',
-  },
-  amountInput: {
-    flex: 1,
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  currencyLabel: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  picker: {
-    height: 50,
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: 'top',
   },
   submitButton: {
     paddingVertical: 14,
@@ -1384,6 +1576,94 @@ const styles = StyleSheet.create({
   deleteIcon: {
     fontSize: 16,
   },
+  inputContainer: {
+    marginBottom: 4,
+  },
+
+  inputWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+
+  textInput: {
+    borderWidth: 1.5,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    fontWeight: '400',
+    minHeight: 52,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+
+  inputIcon: {
+    position: 'absolute',
+    left: 16,
+    fontSize: 18,
+    zIndex: 1,
+    top: '50%',
+    marginTop: -9, // Half of fontSize to center vertically
+  },
+
+  inputIconTextArea: {
+    position: 'absolute',
+    left: 16,
+    fontSize: 18,
+    zIndex: 1,
+    top: 16, // Fixed position for textarea
+  },
+
+  amountContainer: {
+    flexDirection: 'row',
+  },
+
+  amountInput: {
+    flex: 1,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    borderRightWidth: 0,
+  },
+
+  currencyLabel: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderLeftWidth: 0,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 52,
+  },
+
+  pickerContainer: {
+    borderWidth: 1.5,
+    borderRadius: 12,
+    minHeight: 52,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+
+  picker: {
+    height: 52,
+    fontSize: 16,
+  },
+
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 14,
+  },
+
+
 });
 
 export default MobilePaymentForm;
