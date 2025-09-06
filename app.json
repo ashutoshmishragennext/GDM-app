@@ -1,17 +1,21 @@
 {
   "expo": {
-    "name": "MyRoleBasedApp",
-    "slug": "MyRoleBasedApp",
+    "name": "GDM",
+    "slug": "gdm",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myrolebasedapp",
+    "scheme": "gdm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
-    "jsEngine": "hermes",
+       "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ranurag404.MyRoleBasedApp",
+      "bundleIdentifier": "com.gdm.app",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -28,9 +32,12 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
       ],
-      "package": "com.ranurag404.MyRoleBasedApp"
+      "package": "com.gdm.app"
     },
     "web": {
       "bundler": "metro",
@@ -50,7 +57,6 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
@@ -63,9 +69,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "da769e07-db57-491e-9fb4-9c2c2a50f467"
+        "projectId": "a8aad38f-c066-4547-87c4-c7c3ad2f2038"
       }
-    },
-    "owner": "ranurag404"
+    }
   }
 }
