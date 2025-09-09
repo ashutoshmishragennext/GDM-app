@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { format as formatDateFns } from 'date-fns';
-import { useTheme } from '@/context/ThemeContext';
-import { ThemedView, ThemedText, ThemedButton } from '@/components/utils/ThemeComponents';
 import { apiService } from '@/api';
+import { ThemedView } from '@/components/utils/ThemeComponents';
+import { useAuth, User } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { format as formatDateFns } from 'date-fns';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import BottomNav from './BottomNav';
-import FolderGrid from './UserDashboard';
-import MetaForm from './MetaForm';
-import Summary from './PaymentSummary/MainSummary';
 import type { Document as AppDocument } from './DocumentsScreen';
 import DocumentDetailsScreen from './DocumentsScreen';
-import { useAuth } from '@/context/AuthContext';
+import MetaForm from './MetaForm';
+import Summary from './PaymentSummary/MainSummary';
+import FolderGrid from './UserDashboard';
 
 interface Folder {
   id: string;
@@ -113,7 +113,7 @@ const DocumentManagementDashboard = () => {
   const [selectedDocument, setSelectedDocument] = useState<AppDocument | null>(null);
   const [metaFormTargetFolder, setMetaFormTargetFolder] = useState<Folder | null>(null);
   const [metaFormSchema, setMetaFormSchema] = useState<MetadataSchema | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [mainView, setMainView] = useState<'home' | 'form' | 'summary'>('home');
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   
@@ -135,7 +135,7 @@ const DocumentManagementDashboard = () => {
     if(user) {
       console.log("User state changed:", user);
     }
-    if (user && Array.isArray(user[0].folder)) {
+    if (user && Array.isArray(user.folder)) {
       fetchFolders();
     }
   }, [user]);
@@ -201,13 +201,17 @@ const DocumentManagementDashboard = () => {
   // --- Fetch Functions ---
   const fetchUser = async () => {
     try {
-    console.log("userData:", currentuser);
-    
+      console.log("userData:", currentuser);
+      
       const data = await apiService.getUserById(currentuser?.id ? currentuser.id : ''); // Fetch full user data
       console.log("Fetched user data:", data);
       
-      setUser(data);
-      // setUsers(data);
+      // Handle both single user object and array of users
+      if (Array.isArray(data)) {
+        setUser(data[0]); // If API returns array, take first user
+      } else {
+        setUser(data); // If API returns single user object
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to load user data');
     }
@@ -219,17 +223,17 @@ const DocumentManagementDashboard = () => {
       setError(null);
       console.log("Fetching folders for user:", user);
       
-      if (!user[0]?.id) throw new Error('User not found');
+      if (!user?.id) throw new Error('User not found');
       
       const data: UserDashboardResponse = await apiService.getFolders({
-        userId: user[0].id,
-        organizationId: user[0].organizationId
+        userId: user.id,
+        organizationId: user.organizationId
       });
       
       const { folders: fetchedFolders, userStats: fetchedUserStats } = data;
       
       // Only include folders that are in the user's folder array
-      const userFolderIds = Array.isArray(user[0]?.folder) ? user[0].folder : [];
+      const userFolderIds = Array.isArray(user?.folder) ? user.folder : [];
       const filteredFolders = fetchedFolders.filter((f: any) => userFolderIds.includes(f.id));
       
       setFolders(filteredFolders);

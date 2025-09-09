@@ -1,9 +1,9 @@
 // context/AuthContext.tsx
 import { apiService } from '@/api';
-import { clearCookies, getCookies } from '@/utils/cookieUtils';
+import { clearCookies } from '@/utils/cookieUtils';
 import { useRouter, useSegments } from 'expo-router';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 export interface User {
   id: string;
@@ -14,6 +14,7 @@ export interface User {
   organizationId?: string;
   createdAt?: string;
   updatedAt?: string;
+  folder?: string[];
 }
 
 interface AuthContextType {

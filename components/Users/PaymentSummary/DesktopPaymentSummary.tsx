@@ -1,18 +1,18 @@
-import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  TextInput, 
-  ScrollView, 
-  FlatList, 
-  Modal, 
-  Image,
-  Dimensions 
-} from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { ThemedText, ThemedView } from '@/components/utils/ThemeComponents';
 import { useTheme } from '@/context/ThemeContext';
-import { ThemedView, ThemedText } from '@/components/utils/ThemeComponents';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+    Dimensions,
+    FlatList,
+    Image,
+    Modal,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -249,7 +249,7 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
     <TouchableOpacity
       className={`flex-row border-b border-gray-100 py-3 px-2 ${
         selectedPayment?.id === payment.id 
-          ? `bg-${theme.name}-50 border-l-4 border-${theme.name}-500` 
+          ? 'bg-blue-50 border-l-4 border-blue-500' 
           : index % 2 === 0 
             ? 'bg-white' 
             : 'bg-gray-50'
@@ -272,7 +272,7 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
                     resizeMode="cover"
                   />
                   {Array.isArray(value) && value.length > 1 && (
-                    <View className={`absolute -top-1 -right-1 bg-${theme.name}-500 rounded-full h-5 w-5 items-center justify-center`}>
+                    <View className="absolute -top-1 -right-1 bg-blue-500 rounded-full h-5 w-5 items-center justify-center">
                       <Text className="text-white text-xs font-bold">{value.length}</Text>
                     </View>
                   )}
@@ -291,9 +291,9 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
       <View className="flex-row items-center justify-center gap-2 px-2">
         <TouchableOpacity
           onPress={() => onRowClick?.(payment.id)}
-          className={`p-2 rounded-lg bg-${theme.name}-50`}
+          className="p-2 rounded-lg bg-blue-50"
         >
-          <Text className={`text-${theme.name}-600`}>👁️</Text>
+          <Text className="text-blue-600">👁️</Text>
         </TouchableOpacity>
         {onEdit && (
           <TouchableOpacity
@@ -310,7 +310,7 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
   return (
     <ThemedView variant="background" style={{ flex: 1 }}>
       {/* Header */}
-      <View className={`bg-${theme.name}-600 shadow-2xl`}>
+      <View className="bg-blue-600 shadow-2xl">
         <View className="px-4 py-4">
           <View className="flex-row items-center justify-between">
             <ThemedText size="2xl" weight="bold" className="text-white">
@@ -322,7 +322,7 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
                 <Text className="text-white">{filteredPayments.length} records</Text>
               </View>
               <View className="flex-row items-center gap-2">
-                <View className={`w-3 h-3 bg-${theme.name}-400 rounded-full`}></View>
+                <View className="w-3 h-3 bg-blue-400 rounded-full"></View>
                 <Text className="text-white">{totalFileSizeMB.toFixed(2)} MB total</Text>
               </View>
             </View>
@@ -338,12 +338,12 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
             <View className="bg-white px-6 py-5 border-b border-gray-200">
               <View className="flex-row items-center justify-between mb-4">
                 <View className="flex-row items-center gap-3">
-                  <Text className={`text-${theme.name}-600 text-2xl`}>💳</Text>
+                  <Text className="text-blue-600 text-2xl">💳</Text>
                   <ThemedText size="xl" weight="bold" className="text-gray-900">
                     Data Records
                   </ThemedText>
-                  <View className={`bg-${theme.name}-100 px-3 py-1 rounded-full`}>
-                    <Text className={`text-${theme.name}-600 text-sm font-medium`}>
+                  <View className="bg-blue-100 px-3 py-1 rounded-full">
+                    <Text className="text-blue-600 text-sm font-medium">
                       {filteredPayments.length}
                     </Text>
                   </View>
@@ -354,12 +354,12 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
                     onPress={() => setShowDateFilter(!showDateFilter)}
                     className={`flex-row items-center gap-2 px-5 py-2.5 rounded-lg font-medium ${
                       showDateFilter || startDate || endDate
-                        ? `bg-${theme.name}-100 border-2 border-${theme.name}-300`
+                        ? 'bg-blue-100 border-2 border-blue-300'
                         : 'bg-white border border-gray-300'
                     }`}
                   >
                     <Text>⚙️</Text>
-                    <Text className={showDateFilter || startDate || endDate ? `text-${theme.name}-700` : 'text-gray-600'}>
+                    <Text className={showDateFilter || startDate || endDate ? 'text-blue-700' : 'text-gray-600'}>
                       Filter Data
                     </Text>
                   </TouchableOpacity>
@@ -441,7 +441,7 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
               ) : (
                 <ScrollView>
                   {/* Table Header */}
-                  <View className={`bg-${theme.name}-600 flex-row py-4`}>
+                  <View className="bg-blue-600 flex-row py-4">
                     {sortedFields.map((fieldKey) => {
                       const fieldSchema = metadata?.properties?.[fieldKey];
                       return (
@@ -477,13 +477,13 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
               <View className="bg-white px-6 py-4 border-b border-gray-200 flex-row items-center justify-between">
                 <View>
                   <View className="flex-row items-center gap-2">
-                    <Text className={`text-${theme.name}-600`}>📄</Text>
+                    <Text className="text-blue-600">📄</Text>
                     <ThemedText size="lg" weight="bold" className="text-gray-900">
                       Uploaded Images
                     </ThemedText>
                   </View>
                   <Text className="text-sm text-gray-600 mt-1">
-                    <Text className={`font-semibold text-${theme.name}-600`}>
+                    <Text className="font-semibold text-blue-600">
                       {getFieldValue(selectedPayment, 'User Name') || selectedPayment.documentType?.name || `Record ${selectedPayment.id}`}
                     </Text>
                     <Text className="text-gray-500 ml-2">
@@ -536,15 +536,15 @@ const DesktopPaymentSummary: React.FC<DesktopPaymentSummaryProps> = ({
                 <View className="flex-row gap-3">
                   <TouchableOpacity
                     onPress={() => onRowClick?.(selectedPayment.id)}
-                    className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 bg-${theme.name}-50 border border-${theme.name}-200 rounded-lg`}
+                    className="flex-1 flex-row items-center justify-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg"
                   >
                     <Text>👁️</Text>
-                    <Text className={`text-${theme.name}-600 font-medium`}>View Details</Text>
+                    <Text className="text-blue-600 font-medium">View Details</Text>
                   </TouchableOpacity>
                   {onEdit && (
                     <TouchableOpacity
                       onPress={() => onEdit(selectedPayment)}
-                      className={`flex-1 flex-row items-center justify-center gap-2 px-4 py-3 bg-${theme.name}-600 rounded-lg`}
+                      className="flex-1 flex-row items-center justify-center gap-2 px-4 py-3 bg-blue-600 rounded-lg"
                     >
                       <Text className="text-white">✏️</Text>
                       <Text className="text-white font-medium">Edit</Text>

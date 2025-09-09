@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  ScrollView, 
-  Modal, 
-  Image, 
-  Dimensions, 
-  Linking,
-  Alert
-} from 'react-native';
+import { ThemedText, ThemedView } from '@/components/utils/ThemeComponents';
 import { useTheme } from '@/context/ThemeContext';
-import { ThemedView, ThemedText } from '@/components/utils/ThemeComponents';
+import React, { useState } from 'react';
+import {
+    Dimensions,
+    Image,
+    Linking,
+    Modal,
+    ScrollView,
+    Text,
+    TouchableOpacity
+} from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -124,7 +122,7 @@ const renderClickableValue = (
           className={`flex-row items-center gap-1 ${isInline ? 'justify-end' : ''}`}
         >
           <Text className="text-base">✉️</Text>
-          <Text className={`text-${theme.name}-600 underline font-semibold break-all`}>
+          <Text className="text-blue-600 underline font-semibold break-all">
             {stringValue}
           </Text>
         </TouchableOpacity>
@@ -273,7 +271,7 @@ const DocumentDetailsScreen: React.FC<DocumentDetailsScreenProps> = ({
                         setCurrentImageIndex(0);
                         setShowImageModal(true);
                       }}
-                      className={`flex-row items-center gap-2 bg-${theme.name}-500 px-4 py-2 rounded-lg`}
+                      className="flex-row items-center gap-2 bg-blue-500 px-4 py-2 rounded-lg"
                     >
                       <Text className="text-white">👁️</Text>
                       <Text className="text-white font-medium">
@@ -316,10 +314,10 @@ const DocumentDetailsScreen: React.FC<DocumentDetailsScreenProps> = ({
             <ThemedView className="flex justify-center p-4 bg-white">
               <TouchableOpacity 
                 onPress={onBack}
-                className={`flex-row items-center justify-center gap-2 border border-${theme.name}-300 px-6 py-2 rounded-lg`}
+                className="flex-row items-center justify-center gap-2 border border-blue-300 px-6 py-2 rounded-lg"
               >
-                <Text className={`text-${theme.name}-700`}>←</Text>
-                <Text className={`text-${theme.name}-700 font-medium`}>Back</Text>
+                <Text className="text-blue-700">←</Text>
+                <Text className="text-blue-700 font-medium">Back</Text>
               </TouchableOpacity>
             </ThemedView>
           </ThemedView>

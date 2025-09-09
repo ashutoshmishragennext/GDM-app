@@ -1,14 +1,14 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  TextInput, 
-  ScrollView,
-} from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { ThemedText, ThemedView } from '@/components/utils/ThemeComponents';
 import { useTheme } from '@/context/ThemeContext';
-import { ThemedView, ThemedText } from '@/components/utils/ThemeComponents';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 interface Payment {
   id: string | number;
@@ -304,7 +304,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
                 </Text>
                 <View className="grid grid-cols-2 gap-2 mx-8">
                   <View>
-                    <Text className={`block text-xs font-medium text-${theme.name}-100 mb-1`}>
+                    <Text className="block text-xs font-medium text-white mb-1">
                       From Date
                     </Text>
                     <TouchableOpacity
@@ -317,7 +317,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
                     </TouchableOpacity>
                   </View>
                   <View>
-                    <Text className={`block text-xs font-medium text-${theme.name}-100 mb-1`}>
+                    <Text className="block text-xs font-medium text-white mb-1">
                       To Date
                     </Text>
                     <TouchableOpacity
@@ -357,7 +357,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
               {filteredPayments.map((payment) => (
                 <TouchableOpacity
                   key={payment.id}
-                  className={`bg-white rounded-lg p-2 shadow-sm border border-gray-100 hover:shadow-md hover:border-${theme.name}-200 transition-all active:scale-95`}
+                  className="bg-white rounded-lg p-2 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all active:scale-95"
                   onPress={() => {
                     if (onRowClick) onRowClick(payment.id);
                   }}
@@ -383,7 +383,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
 
                           return (
                             <View key={fieldKey} className="flex flex-row items-center gap-1 min-w-0">
-                              <Text className={`text-${theme.name}-500 flex-shrink-0`}>
+                              <Text className="text-blue-500 flex-shrink-0">
                                 {icon}
                               </Text>
                               <Text className="text-sm font-semibold text-gray-900" numberOfLines={1}>
@@ -410,7 +410,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
 
                         return (
                           <View key={fieldKey} className="flex flex-row items-center gap-1 min-w-0">
-                            <Text className={`text-${theme.name}-400 flex-shrink-0`}>
+                            <Text className="text-blue-400 flex-shrink-0">
                               {icon}
                             </Text>
                             <Text className="text-xs font-medium text-gray-600" numberOfLines={1}>
