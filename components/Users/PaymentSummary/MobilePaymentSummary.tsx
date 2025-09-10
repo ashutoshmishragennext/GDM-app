@@ -233,7 +233,7 @@ const MobilePaymentSummary: React.FC<MobilePaymentSummaryProps> = ({
       ]} className='pb-14' variant="background">
       <View className="min-h-screen bg-gray-50">
         {/* Header */}
-        <ThemedView style={[{backgroundColor : theme.colors.primary}]} className="text-white shadow-md">
+        <ThemedView style={[{backgroundColor : theme.colors.primary}]} className="text-white">
           <View className="px-4 py-4">
             <View className="flex flex-row justify-between items-center mb-4">
               <ThemedText size="xl" weight="bold" className="text-white">
