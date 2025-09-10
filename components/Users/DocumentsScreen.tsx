@@ -8,7 +8,8 @@ import {
     Modal,
     ScrollView,
     Text,
-    TouchableOpacity
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -219,7 +220,6 @@ const DocumentDetailsScreen: React.FC<DocumentDetailsScreenProps> = ({
   schema 
 }) => {
   const { theme } = useTheme();
-  const [enlargedImageIndex, setEnlargedImageIndex] = useState<number | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -227,99 +227,80 @@ const DocumentDetailsScreen: React.FC<DocumentDetailsScreenProps> = ({
   const detailRows = getDetailRows(metadata, schema);
   const images = getImages(metadata);
 
-  const handleNextImage = () => {
-    if (enlargedImageIndex !== null) {
-      setEnlargedImageIndex((enlargedImageIndex + 1) % images.length);
-    }
-  };
-
-  const handlePrevImage = () => {
-    if (enlargedImageIndex !== null) {
-      setEnlargedImageIndex((enlargedImageIndex - 1 + images.length) % images.length);
-    }
-  };
-
   return (
     <ThemedView variant="background" style={{ flex: 1 }}>
       <ThemedView style={[
-        // styles.desktopNav,
         { 
-          backgroundColor: theme.colors.primary,
+          backgroundColor: theme.colors.background,
           borderRightColor: theme.colors.border,
         }
-      ]} className={`min-h-screen py-4 px-3 pb-24`}>
-        <ThemedView className="bg-white rounded-2xl shadow-2xl flex-1 overflow-hidden max-w-full w-full min-h-[500px]">
+      ]} className={`min-h-screen py-6 px-4 pb-24`}>
+        <ThemedView className="bg-white rounded-xl shadow-lg flex-1 overflow-hidden max-w-full w-full min-h-[500px]">
           <ThemedView className="bg-white flex-1" style={{ minHeight: 400 }}>
             
             {/* Header Section */}
-            <ThemedView className="bg-red-500 relative">
-              <ThemedView className="py-4 sm:py-6 text-left border-b-2 border-gray-300 pb-3">
+            <ThemedView className="relative">
+              <ThemedView className="py-5 px-5 border-b border-gray-200 flex-row justify-between items-center">
+                <TouchableOpacity
+                  onPress={onBack}
+                  className="p-2 rounded-full bg-gray-100"
+                >
+                  <Text className="text-gray-800 text-xl font-bold">×</Text>
+                </TouchableOpacity>
                 <ThemedText 
                   size="xl" 
                   weight="bold" 
-                  className="text-gray-800 mb-1 pl-3"
-                  style={{ flexWrap: 'wrap' }}
+                  className="text-gray-800 flex-1 text-center"
+                  style={{ flexWrap: 'wrap', maxWidth: '60%' }}
                 >
                   {doc.documentType?.name || "Document Details"}
                 </ThemedText>
-                
                 {/* Image Button */}
                 {images.length > 0 && (
-                  <ThemedView className="absolute right-2 top-3">
-                    <TouchableOpacity
-                      onPress={() => {
-                        setCurrentImageIndex(0);
-                        setShowImageModal(true);
-                      }}
-                      className="flex-row items-center gap-2 bg-blue-500 px-4 py-2 rounded-lg"
-                    >
-                      <Text className="text-white">👁️</Text>
-                      <Text className="text-white font-medium">
-                        Image ({images.length})
-                      </Text>
-                    </TouchableOpacity>
-                  </ThemedView>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setCurrentImageIndex(0);
+                      setShowImageModal(true);
+                    }}
+                    className="flex-row items-center gap-1 bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200"
+                  >
+                    <Text className="text-blue-700 text-sm">🖼️</Text>
+                    <Text className="text-blue-700 font-medium text-xs">
+                      View Image ({images.length})
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </ThemedView>
             </ThemedView>
 
             {/* Detail Rows Section */}
-            <ScrollView className="flex-1 px-4 pt-2 border-t border-gray-200 bg-gray-50">
-              <ThemedView className="space-y-2 pb-4">
+            <ScrollView className="flex-1 px-5 pt-4 bg-gray-100" showsVerticalScrollIndicator={false}>
+              <ThemedView className="pb-6">
                 {detailRows.map((row, idx) => {
                   if (!row) return null;
                   
                   const isInline = shouldUseInlineLayout(row.key, row.value, row.fieldType);
                   
                   return (
-                    <ThemedView 
-                      key={idx}
-                      className={`py-2 border-b border-gray-200 ${
-                        isInline ? 'flex-row justify-between items-start gap-3' : 'flex-col gap-1'
-                      }`}
-                    >
-                      <Text className={`text-gray-600 font-medium text-sm ${isInline ? 'min-w-[100px] max-w-[120px]' : ''}`}>
-                        {row.label}
-                      </Text>
-                      <ThemedView className={`flex-1 ${isInline ? 'min-w-0' : ''}`}>
-                        {renderClickableValue(row.value, row.fieldType, theme, isInline)}
+                    <ThemedView key={idx}>
+                      <ThemedView 
+                        className={`py-3 ${isInline ? 'flex-row justify-between items-start gap-3' : 'flex-col gap-2'}`}
+                      >
+                        <Text className={`text-gray-500 font-medium text-sm ${isInline ? 'min-w-[100px] max-w-[120px]' : ''}`}>
+                          {row.label}
+                        </Text>
+                        <ThemedView className={`flex-1 ${isInline ? 'min-w-0' : ''}`}>
+                          {renderClickableValue(row.value, row.fieldType, theme, isInline)}
+                        </ThemedView>
                       </ThemedView>
+                      {idx < detailRows.length - 1 && (
+                        <View className="border-b border-gray-200 my-2" />
+                      )}
                     </ThemedView>
                   );
                 })}
               </ThemedView>
             </ScrollView>
-
-            {/* Back Button */}
-            <ThemedView className="flex justify-center p-4 bg-white">
-              <TouchableOpacity 
-                onPress={onBack}
-                className="flex-row items-center justify-center gap-2 border border-blue-300 px-6 py-2 rounded-lg"
-              >
-                <Text className="text-blue-700">←</Text>
-                <Text className="text-blue-700 font-medium">Back</Text>
-              </TouchableOpacity>
-            </ThemedView>
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -331,61 +312,66 @@ const DocumentDetailsScreen: React.FC<DocumentDetailsScreenProps> = ({
         animationType="fade"
         onRequestClose={() => setShowImageModal(false)}
       >
-        <ThemedView className="flex-1 bg-black/95 items-center justify-center p-4">
+        <View className="flex-1 bg-black/95 items-center justify-center p-4">
           {/* Navigation Buttons */}
           {images.length > 1 && (
             <>
               <TouchableOpacity
-                className="absolute left-4 top-1/2 -mt-6 p-3 bg-white/20 rounded-full"
+                className="absolute left-6 top-1/2 -mt-6 p-4 bg-black/50 rounded-full"
                 onPress={() => {
                   setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
                 }}
               >
-                <Text className="text-white text-2xl">‹</Text>
+                <Text className="text-white text-2xl font-bold">‹</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                className="absolute right-4 top-1/2 -mt-6 p-3 bg-white/20 rounded-full"
+                className="absolute right-6 top-1/2 -mt-6 p-4 bg-black/50 rounded-full"
                 onPress={() => {
                   setCurrentImageIndex((prev) => (prev + 1) % images.length);
                 }}
               >
-                <Text className="text-white text-2xl">›</Text>
+                <Text className="text-white text-2xl font-bold">›</Text>
               </TouchableOpacity>
             </>
           )}
 
           {/* Main Image */}
-          <ThemedView className="relative max-w-[90vw] max-h-[90vh] items-center justify-center">
+          <View className="relative max-w-[90vw] max-h-[90vh] items-center justify-center">
             <Image
               source={{ uri: images[currentImageIndex] }}
               style={{ 
-                width: width * 0.9, 
-                height: height * 0.7,
-                borderRadius: 8
+                width: width * 0.85, 
+                height: height * 0.75,
+                borderRadius: 12
               }}
               resizeMode="contain"
             />
-          </ThemedView>
+          </View>
 
           {/* Close Button */}
           <TouchableOpacity
-            className="absolute top-12 right-4 p-3 bg-white/20 rounded-full"
+            className="absolute top-16 right-6 p-3 bg-black/50 rounded-full"
             onPress={() => setShowImageModal(false)}
           >
-            <Text className="text-white text-2xl">×</Text>
+            <Text className="text-white text-2xl font-bold">×</Text>
           </TouchableOpacity>
 
           {/* Image Counter */}
-          <ThemedView className="absolute bottom-4 bg-black/70 px-4 py-2 rounded-lg">
-            <Text className="text-white text-sm text-center">
+          <View className="absolute bottom-8 bg-black/70 px-5 py-3 rounded-full">
+            <Text className="text-white text-sm text-center font-medium">
               {currentImageIndex + 1} of {images.length}
             </Text>
-            <Text className="text-gray-300 text-xs mt-1 text-center max-w-[250px]">
+          </View>
+          
+          {/* Document Name */}
+          <View className="absolute top-20 items-center justify-center w-full px-4">
+            <Text className="text-white text-center font-medium text-sm bg-black/30 px-4 py-2 rounded-full max-w-[80%]"
+                  numberOfLines={1} ellipsizeMode="tail">
               {doc.documentType?.name || 'Document'}
             </Text>
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
       </Modal>
     </ThemedView>
   );

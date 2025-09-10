@@ -850,7 +850,7 @@ const renderField = (key: string, field: MetadataField, parentSchema: any, icon?
   };
 
   return (
-    <ThemedView variant="background" style={{ flex: 1 }}>
+    <ThemedView  variant="background" style={{ flex: 1 ,paddingHorizontal:0}}>
       <ScrollView
         contentContainerStyle={[
           styles.container,
@@ -865,7 +865,8 @@ const renderField = (key: string, field: MetadataField, parentSchema: any, icon?
             styles.header,
             {
               backgroundColor: theme.colors.primary,
-              marginBottom: theme.spacing.md,
+              // marginBottom: theme.spacing.md,
+             
             }
           ]}
         >
@@ -953,8 +954,8 @@ const renderField = (key: string, field: MetadataField, parentSchema: any, icon?
           style={[
             styles.formContainer,
             {
-              borderRadius: theme.borderRadius.lg,
-              padding: theme.spacing.md,
+              // borderRadius: theme.borderRadius.lg,
+              padding: theme.spacing.lg,
               borderColor: theme.colors.border,
             }
           ]}
@@ -1310,11 +1311,21 @@ const renderField = (key: string, field: MetadataField, parentSchema: any, icon?
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
+    paddingHorizontal:0,
   },
   header: {
+    
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+  // Remove any horizontal padding
+  paddingHorizontal: 0,
+  // Add margin to compensate if needed
+  marginHorizontal: -12, // Adjust this value based on your form container's padding
+  // Or use width: '100%' + negative margins
+  width: width, // Use Dimensions width
+  alignSelf: 'center',
+    // paddingHorizontal: 12,
+    // borderRadius: 12,
+    
   },
   statusContainer: {
     paddingHorizontal: 12,
@@ -1343,6 +1354,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    
   },
 
   // Updated Upload Section Styles

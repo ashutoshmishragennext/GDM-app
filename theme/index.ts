@@ -1,4 +1,4 @@
-// Theme Types
+// Theme Types (existing code remains the same)
 export interface ColorPalette {
   primary: string;
   primaryLight: string;
@@ -69,7 +69,7 @@ export interface Theme {
   };
 }
 
-// Theme 0 - Red Theme
+// Theme 0 - Red Theme (existing)
 const redTheme: Theme = {
   id: 0,
   name: 'Red',
@@ -121,7 +121,7 @@ const redTheme: Theme = {
     sm: 8,
     md: 16,
     lg: 24,
-    xl: 32,
+    xl: 32,  
     '2xl': 48,
     '3xl': 64,
   },
@@ -134,7 +134,7 @@ const redTheme: Theme = {
   },
 };
 
-// Theme 1 - Blue Theme
+// Theme 1 - Blue Theme (existing)
 const blueTheme: Theme = {
   id: 1,
   name: 'Blue',
@@ -199,7 +199,7 @@ const blueTheme: Theme = {
   },
 };
 
-// Theme 2 - Green Theme
+// Theme 2 - Green Theme (existing)
 const greenTheme: Theme = {
   id: 2,
   name: 'Green',
@@ -264,7 +264,7 @@ const greenTheme: Theme = {
   },
 };
 
-// Theme 3 - Purple Theme
+// Theme 3 - Purple Theme (existing)
 const purpleTheme: Theme = {
   id: 3,
   name: 'Purple',
@@ -329,13 +329,218 @@ const purpleTheme: Theme = {
   },
 };
 
-// Export all themes
-export const themes: Theme[] = [redTheme, blueTheme, greenTheme, purpleTheme];
+// NEW THEMES:
 
-// Helper function to get theme by ID
+// Theme 4 - Pink Theme
+const pinkTheme: Theme = {
+  id: 4,
+  name: 'Pink',
+  colors: {
+    primary: '#EC4899',
+    primaryLight: '#FBCFE8',
+    primaryDark: '#BE185D',
+    secondary: '#8B5CF6',
+    background: '#FDF2F8',
+    surface: '#FCE7F3',
+    text: '#831843',
+    textSecondary: '#9D174D',
+    error: '#F43F5E',
+    warning: '#F59E0B',
+    success: '#10B981',
+    info: '#3B82F6',
+    border: '#FBCFE8',
+    disabled: '#FDA4AF',
+    shadow: '#EC489920',
+  },
+  fonts: {
+    sizes: {
+      xs: 12,
+      sm: 14,
+      base: 16,
+      lg: 18,
+      xl: 20,
+      '2xl': 24,
+      '3xl': 30,
+      '4xl': 36,
+    },
+    weights: {
+      light: '300',
+      regular: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+      heavy: '800',
+    },
+    families: {
+      regular: 'System',
+      medium: 'System',
+      bold: 'System',
+      light: 'System',
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+    '2xl': 48,
+    '3xl': 64,
+  },
+  borderRadius: {
+    sm: 6,
+    md: 10,
+    lg: 14,
+    xl: 18,
+    full: 9999,
+  },
+};
+
+// Theme 5 - Indigo Theme
+const indigoTheme: Theme = {
+  id: 5,
+  name: 'Indigo',
+  colors: {
+    primary: '#4F46E5',
+    primaryLight: '#818CF8',
+    primaryDark: '#3730A3',
+    secondary: '#7C3AED',
+    background: '#EEF2FF',
+    surface: '#E0E7FF',  
+    text: '#312E81',
+    textSecondary: '#4B5563',
+    error: '#EF4444',
+    warning: '#F59E0B',
+    success: '#10B981',
+    info: '#06B6D4',
+    border: '#C7D2FE',
+    disabled: '#9CA3AF',
+    shadow: '#4F46E520',
+  },
+  fonts: {
+    sizes: {
+      xs: 12,
+      sm: 14,
+      base: 16,
+      lg: 18,
+      xl: 20,
+      '2xl': 24,
+      '3xl': 30,
+      '4xl': 36,
+    },
+    weights: {
+      light: '300',
+      regular: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+      heavy: '800',
+    },
+    families: {
+      regular: 'Inter-Regular',
+      medium: 'Inter-Medium',
+      bold: 'Inter-Bold',
+      light: 'Inter-Light',
+    },
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+    '2xl': 48,
+    '3xl': 64,
+  },
+  borderRadius: {
+    sm: 4,
+    md: 8,
+    lg: 12,
+    xl: 16,
+    full: 9999,
+  },
+};
+
+// Theme 6 - Yellow Theme
+const yellowTheme: Theme = {
+  id: 6,
+  name: 'Yellow',
+  colors: {
+    primary: '#F59E0B',
+    primaryLight: '#FDE68A',
+    primaryDark: '#D97706',
+    secondary: '#F97316',
+    background: '#FFFBEB',
+    surface: '#FEF3C7',
+    text: '#78350F',
+    textSecondary: '#92400E',
+    error: '#DC2626',
+    warning: '#F59E0B',
+    success: '#10B981',
+    info: '#3B82F6',
+    border: '#FDE68A',
+    disabled: '#FBBF24',
+    shadow: '#F59E0B20',
+  },
+  fonts: {
+    sizes: {
+      xs: 11,
+      sm: 13,
+      base: 15,
+      lg: 17,
+      xl: 19,
+      '2xl': 23,
+      '3xl': 29,
+      '4xl': 35,
+    },
+    weights: {
+      light: '300',
+      regular: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+      heavy: '800',
+    },
+    families: {
+      regular: 'Roboto-Regular',
+      medium: 'Roboto-Medium',
+      bold: 'Roboto-Bold',
+      light: 'Roboto-Light',
+    },
+  },
+  spacing: {
+    xs: 3,
+    sm: 6,
+    md: 12,
+    lg: 20,
+    xl: 28,
+    '2xl': 40,
+    '3xl': 56,
+  },
+  borderRadius: {
+    sm: 5,
+    md: 9,
+    lg: 13,
+    xl: 17,
+    full: 9999,
+  },
+};
+
+// Export all themes (updated to include new themes)
+export const themes: Theme[] = [
+  redTheme, 
+  blueTheme, 
+  greenTheme, 
+  purpleTheme,
+  pinkTheme,
+  indigoTheme,
+  yellowTheme
+];
+
+// Helper function to get theme by ID (existing)
 export const getThemeById = (id: number): Theme => {
   return themes.find(theme => theme.id === id) || themes[0];
 };
 
-// Default theme
+// Default theme (existing)
 export const defaultTheme = themes[0];

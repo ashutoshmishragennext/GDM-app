@@ -477,7 +477,7 @@ const DocumentManagementDashboard = () => {
               )}
               
               {mainView === 'form' && selectedFolder && selectedFolderSchema && (
-                <View style={{ marginHorizontal: theme.spacing.md }}>
+                <View>
                   <MetaForm
                     folder={selectedFolder}
                     schema={selectedFolderSchema}

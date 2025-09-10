@@ -298,7 +298,7 @@ const removeUrl = (key: string, index: number) => {
         contentContainerStyle={[
           styles.container,
           { 
-            paddingTop: theme.spacing['sm'],
+            // paddingTop: theme.spacing['sm'],
             paddingBottom: theme.spacing['3xl'], // Extra padding for bottom nav
           }
         ]}

@@ -19,15 +19,28 @@ export default function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [orgLogo, setOrgLogo] = useState<string | null | undefined>(null);
   const {theme,setTheme} = useTheme();
+
+  
   const fetchOrganizationLogo = async () => {
     const data = await apiService.getOrganizationById(user?.organizationId ? user.organizationId : '',);
     setOrgLogo(data.logo)
+    //  red , blue ,green , purple , pink , indigo , yellow
     if(data.themecolor === "red") {
       setTheme(0);
     } else if (data.themecolor === "blue")
       setTheme(1);
-      else
+      else if(data.themecolor === "green")
         setTheme(2)
+      else if(data.themecolor === "purple")
+        setTheme(3)
+      else if(data.themecolor === "pink")
+        setTheme(4)
+      else if(data.themecolor === "indigo")
+        setTheme(5)
+      else if(data.themecolor === "yellow")
+        setTheme(6)
+      else 
+        setTheme(1)
   }
 
   useEffect(() => {
