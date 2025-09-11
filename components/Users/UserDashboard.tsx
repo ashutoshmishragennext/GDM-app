@@ -164,7 +164,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({
     <ScrollView className="flex-1 bg-gray-50" showsVerticalScrollIndicator={false}>
       <View className="p-4 max-w-7xl mx-auto pb-20">
         {/* Header */}
-         <View className="bg-white rounded-xl p-4 shadow-sm mb-4">
+         <View className="bg-white rounded-xl p-4 mb-4">
   <View className="flex-row justify-between items-start">
     <View className="flex-row items-center flex-1">
       <View className="flex-1">

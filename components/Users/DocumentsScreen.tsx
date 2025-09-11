@@ -239,39 +239,43 @@ const DocumentDetailsScreen: React.FC<DocumentDetailsScreenProps> = ({
           <ThemedView className="bg-white flex-1" style={{ minHeight: 400 }}>
             
             {/* Header Section */}
-            <ThemedView className="relative">
-              <ThemedView className="py-5 px-5 border-b border-gray-200 flex-row justify-between items-center">
-                <TouchableOpacity
-                  onPress={onBack}
-                  className="p-2 rounded-full bg-gray-100"
-                >
-                  <Text className="text-gray-800 text-xl font-bold">×</Text>
-                </TouchableOpacity>
-                <ThemedText 
-                  size="xl" 
-                  weight="bold" 
-                  className="text-gray-800 flex-1 text-center"
-                  style={{ flexWrap: 'wrap', maxWidth: '60%' }}
-                >
-                  {doc.documentType?.name || "Document Details"}
-                </ThemedText>
-                {/* Image Button */}
-                {images.length > 0 && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setCurrentImageIndex(0);
-                      setShowImageModal(true);
-                    }}
-                    className="flex-row items-center gap-1 bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200"
-                  >
-                    <Text className="text-blue-700 text-sm">🖼️</Text>
-                    <Text className="text-blue-700 font-medium text-xs">
-                      View Image ({images.length})
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </ThemedView>
-            </ThemedView>
+           <ThemedView className="relative">
+  <ThemedView className="py-3 px-1 flex-row justify-between items-center">
+    {/* Title with proper spacing */}
+    <ThemedText 
+      size="xl" 
+      weight="bold" 
+      className="text-gray-800 flex-1 mx-2"
+      style={{ flexWrap: 'wrap', maxWidth: '60%' }}
+    >
+      {doc.documentType?.name || "Document Details"}
+    </ThemedText>
+    
+    {/* Image Button with proper spacing */}
+    {images.length > 0 && (
+      <TouchableOpacity
+  onPress={() => {
+    setCurrentImageIndex(0);
+    setShowImageModal(true);
+  }}
+  className="flex-row items-center justify-center gap-1 bg-blue-100 px-3 py-2 rounded-lg border border-blue-200 mx-2"
+>
+  <Text className="text-blue-700 text-sm leading-none">🖼️</Text>
+  <Text className="text-blue-700 font-medium text-xs leading-tight">
+    View({images.length})
+  </Text>
+</TouchableOpacity>
+    )}
+    
+    {/* Close button with proper spacing */}
+    <TouchableOpacity
+      onPress={onBack}
+      className="w-10 h-10 items-center justify-center rounded-full bg-gray-100 mx-2"
+    >
+      <Text className="text-gray-800 text-xl font-bold">×</Text>
+    </TouchableOpacity>
+  </ThemedView>
+</ThemedView>
 
             {/* Detail Rows Section */}
             <ScrollView className="flex-1 px-5 pt-4 bg-gray-100" showsVerticalScrollIndicator={false}>

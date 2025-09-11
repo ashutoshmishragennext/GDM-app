@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   },
   desktopNavHeader: {
     padding: 16,
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
   },
   navItems: {
     flex: 1,
